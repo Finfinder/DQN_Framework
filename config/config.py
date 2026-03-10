@@ -41,8 +41,8 @@ class Config:
         },
         "Acrobot-v1": {
             "hidden_layers": [128, 128],
-            "num_episodes": 1500,
-            "solved_threshold": -85.0,
+            "num_episodes": 2000,
+            "solved_threshold": -80.0,
             "model_path": "dqn_acrobot.pth",
             "plot_path": "training_curve_acrobot.png",
         },
