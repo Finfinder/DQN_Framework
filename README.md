@@ -25,11 +25,12 @@ Aktualnie projekt wspiera konfiguracje:
   - `gymnasium`
   - `numpy`
   - `matplotlib`
+  - `tensorboard`
 
 Przykladowa instalacja:
 
 ```bash
-pip install torch gymnasium numpy matplotlib
+pip install torch gymnasium numpy matplotlib tensorboard
 ```
 
 ## Szybki start
@@ -97,6 +98,25 @@ Podczas treningu zapisywane sa:
 
 - plik wag modelu (`*.pth`) do `config.model_path`,
 - wykres uczenia (`*.png`) do `config.plot_path`.
+- logi TensorBoard do katalogu `logs/<env_name>_<YYYYMMDD-HHMMSS>/`.
+
+Aby podejrzec metryki podczas/po treningu:
+
+```bash
+tensorboard --logdir logs
+```
+
+Logowane metryki obejmuja m.in.:
+
+- `episode/reward`
+- `episode/avg100`
+- `episode/epsilon`
+- `episode/loss`
+- `episode/q_mean`
+- `train/loss`
+- `train/q_mean`
+- `train/q_max_mean`
+- `train/target_q_mean`
 
 Przykladowe artefakty widoczne w repo:
 

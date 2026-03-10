@@ -27,7 +27,7 @@ class DQNAgent:
 
     def train_step(self):
         if len(self.memory) < self.config.batch_size:
-            return
+            return None
 
         states, actions, rewards, next_states, dones = self.memory.sample(self.config.batch_size)
 
@@ -62,3 +62,10 @@ class DQNAgent:
             target_param.data.copy_(
                 self.config.tau*param.data + (1-self.config.tau)*target_param.data
             )
+
+        return {
+            "loss": float(loss.item()),
+            "q_mean": float(q_value.mean().item()),
+            "target_q_mean": float(expected_q.mean().item()),
+            "q_max_mean": float(q_values.max(dim=1).values.mean().item()),
+        }

@@ -4,6 +4,9 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+from datetime import datetime
+from pathlib import Path
+from torch.utils.tensorboard import SummaryWriter
 
 from config.config import Config
 from models.dqn_network import DQN
@@ -60,61 +63,89 @@ episode_rewards = []
 best_avg_reward = float("-inf")
 saved_best = False
 
-for episode in range(1, config.num_episodes + 1):
+run_started_at = datetime.now().strftime("%Y%m%d-%H%M%S")
+safe_env_name = config.env_name.replace("/", "_")
+run_log_dir = Path("logs") / f"{safe_env_name}_{run_started_at}"
+run_log_dir.mkdir(parents=True, exist_ok=True)
+writer = SummaryWriter(log_dir=str(run_log_dir))
 
-    if episode == 1 and config.seed is not None:
-        state, _ = env.reset(seed=config.seed)
-    else:
-        state, _ = env.reset()
+print(f"TensorBoard logs: {run_log_dir}")
 
-    done = False
-    total_reward = 0.0
+try:
+    for episode in range(1, config.num_episodes + 1):
 
-    while not done:
+        if episode == 1 and config.seed is not None:
+            state, _ = env.reset(seed=config.seed)
+        else:
+            state, _ = env.reset()
 
-        action = agent.select_action(state, epsilon, env)
+        done = False
+        total_reward = 0.0
+        episode_losses = []
+        episode_q_means = []
 
-        next_state, reward, terminated, truncated, _ = env.step(action)
+        while not done:
 
-        done = terminated or truncated
+            action = agent.select_action(state, epsilon, env)
 
-        train_reward = reward
-        if config.env_name == "CartPole-v1" and terminated:
-            # Penalize failure transitions to improve value separation.
-            train_reward = -10.0
+            next_state, reward, terminated, truncated, _ = env.step(action)
 
-        memory.push(state, action, train_reward, next_state, done)
+            done = terminated or truncated
 
-        state = next_state
-        total_reward += float(reward)
-        step_count += 1
+            train_reward = reward
+            if config.env_name == "CartPole-v1" and terminated:
+                # Penalize failure transitions to improve value separation.
+                train_reward = -10.0
 
-        if len(memory) >= config.min_replay_size and step_count % config.train_every_steps == 0:
-            agent.train_step()
+            memory.push(state, action, train_reward, next_state, done)
 
-    epsilon = max(config.epsilon_min, epsilon * config.epsilon_decay)
+            state = next_state
+            total_reward += float(reward)
+            step_count += 1
 
-    episode_rewards.append(total_reward)
-    avg_reward_100 = float(np.mean(episode_rewards[-100:]))
+            if len(memory) >= config.min_replay_size and step_count % config.train_every_steps == 0:
+                train_stats = agent.train_step()
+                if train_stats is not None:
+                    episode_losses.append(train_stats["loss"])
+                    episode_q_means.append(train_stats["q_mean"])
+                    writer.add_scalar("train/loss", train_stats["loss"], step_count)
+                    writer.add_scalar("train/q_mean", train_stats["q_mean"], step_count)
+                    writer.add_scalar("train/q_max_mean", train_stats["q_max_mean"], step_count)
+                    writer.add_scalar("train/target_q_mean", train_stats["target_q_mean"], step_count)
 
-    print(
-        f"Episode {episode}, Reward: {total_reward:.1f}, "
-        f"Avg100: {avg_reward_100:.1f}, Epsilon: {epsilon:.3f}"
-    )
+        epsilon = max(config.epsilon_min, epsilon * config.epsilon_decay)
 
-    if len(episode_rewards) >= 100 and avg_reward_100 > best_avg_reward:
-        best_avg_reward = avg_reward_100
-        torch.save(policy_net.state_dict(), config.model_path)
-        saved_best = True
+        episode_rewards.append(total_reward)
+        avg_reward_100 = float(np.mean(episode_rewards[-100:]))
 
-    if len(episode_rewards) >= 100 and avg_reward_100 > config.solved_threshold:
-        torch.save(policy_net.state_dict(), config.model_path)
-        saved_best = True
+        writer.add_scalar("episode/reward", total_reward, episode)
+        writer.add_scalar("episode/avg100", avg_reward_100, episode)
+        writer.add_scalar("episode/epsilon", epsilon, episode)
+        if episode_losses:
+            writer.add_scalar("episode/loss", float(np.mean(episode_losses)), episode)
+        if episode_q_means:
+            writer.add_scalar("episode/q_mean", float(np.mean(episode_q_means)), episode)
+
         print(
-            f"Early stopping: Avg100 = {avg_reward_100:.1f} > {config.solved_threshold:.1f}. "
-            f"Saved model to {config.model_path}"
+            f"Episode {episode}, Reward: {total_reward:.1f}, "
+            f"Avg100: {avg_reward_100:.1f}, Epsilon: {epsilon:.3f}"
         )
-        break
+
+        if len(episode_rewards) >= 100 and avg_reward_100 > best_avg_reward:
+            best_avg_reward = avg_reward_100
+            torch.save(policy_net.state_dict(), config.model_path)
+            saved_best = True
+
+        if len(episode_rewards) >= 100 and avg_reward_100 > config.solved_threshold:
+            torch.save(policy_net.state_dict(), config.model_path)
+            saved_best = True
+            print(
+                f"Early stopping: Avg100 = {avg_reward_100:.1f} > {config.solved_threshold:.1f}. "
+                f"Saved model to {config.model_path}"
+            )
+            break
+finally:
+    writer.close()
 
 if not saved_best:
     torch.save(policy_net.state_dict(), config.model_path)
