@@ -1,4 +1,5 @@
 import argparse
+import csv
 import gymnasium as gym
 import torch
 import numpy as np
@@ -65,11 +66,20 @@ saved_best = False
 
 run_started_at = datetime.now().strftime("%Y%m%d-%H%M%S")
 safe_env_name = config.env_name.replace("/", "_")
+safe_model_name = Path(config.model_path).stem.replace("/", "_")
 run_log_dir = Path("logs") / f"{safe_env_name}_{run_started_at}"
 run_log_dir.mkdir(parents=True, exist_ok=True)
 writer = SummaryWriter(log_dir=str(run_log_dir))
 
+metrics_dir = Path("metrics")
+metrics_dir.mkdir(parents=True, exist_ok=True)
+metrics_file = metrics_dir / f"{safe_env_name}_{safe_model_name}_{run_started_at}.csv"
+metrics_fp = metrics_file.open("w", newline="", encoding="utf-8")
+metrics_writer = csv.writer(metrics_fp)
+metrics_writer.writerow(["episode", "reward", "avg100", "epsilon"])
+
 print(f"TensorBoard logs: {run_log_dir}")
+print(f"CSV metrics: {metrics_file}")
 
 try:
     for episode in range(1, config.num_episodes + 1):
@@ -121,6 +131,7 @@ try:
         writer.add_scalar("episode/reward", total_reward, episode)
         writer.add_scalar("episode/avg100", avg_reward_100, episode)
         writer.add_scalar("episode/epsilon", epsilon, episode)
+        metrics_writer.writerow([episode, total_reward, avg_reward_100, epsilon])
         if episode_losses:
             writer.add_scalar("episode/loss", float(np.mean(episode_losses)), episode)
         if episode_q_means:
@@ -146,6 +157,7 @@ try:
             break
 finally:
     writer.close()
+    metrics_fp.close()
 
 if not saved_best:
     torch.save(policy_net.state_dict(), config.model_path)

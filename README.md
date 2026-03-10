@@ -99,6 +99,7 @@ Podczas treningu zapisywane sa:
 - plik wag modelu (`*.pth`) do `config.model_path`,
 - wykres uczenia (`*.png`) do `config.plot_path`.
 - logi TensorBoard do katalogu `logs/<env_name>_<YYYYMMDD-HHMMSS>/`.
+- metryki epizodow do CSV: `metrics/<env_name>_<model_name>_<YYYYMMDD-HHMMSS>.csv`.
 
 Aby podejrzec metryki podczas/po treningu:
 
@@ -117,6 +118,13 @@ Logowane metryki obejmuja m.in.:
 - `train/q_mean`
 - `train/q_max_mean`
 - `train/target_q_mean`
+
+CSV zawiera kolumny:
+
+- `episode`
+- `reward`
+- `avg100`
+- `epsilon`
 
 Przykladowe artefakty widoczne w repo:
 
