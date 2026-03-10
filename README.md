@@ -40,6 +40,14 @@ pip install torch gymnasium numpy matplotlib
 python train.py
 ```
 
+1. Trening dla konkretnego srodowiska:
+
+```bash
+python train.py CartPole-v1
+python train.py MountainCar-v0
+python train.py Acrobot-v1
+```
+
 1. Ogladanie wytrenowanego agenta:
 
 ```bash
@@ -70,19 +78,16 @@ Najwazniejsze pola:
 - `solved_threshold`
 - `model_path`, `plot_path`, `play_episodes`
 
-Domyslnie `Config()` uruchamia preset dla `CartPole-v1`.
+Domyslnie `python train.py` uruchamia preset dla `CartPole-v1`.
 
-Aby zmienic srodowisko, podmien inicjalizacje konfiguracji w `train.py` i `play.py`, np.:
+Aby uruchomic trening dla innego wspieranego srodowiska, podaj je jako argument:
 
-```python
-config = Config(env_name="MountainCar-v0")
+```bash
+python train.py MountainCar-v0
+python train.py Acrobot-v1
 ```
 
-lub:
-
-```python
-config = Config(env_name="Acrobot-v1")
-```
+Uwaga: wspierane sa tylko srodowiska z `Config.ENV_CONFIG`.
 
 ## Wyniki i artefakty
 

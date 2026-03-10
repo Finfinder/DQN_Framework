@@ -1,3 +1,4 @@
+import argparse
 import gymnasium as gym
 import torch
 import numpy as np
@@ -17,7 +18,22 @@ def set_seed(seed):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-config = Config()
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Train DQN for a supported Gymnasium environment."
+    )
+    parser.add_argument(
+        "env_name",
+        nargs="?",
+        default="CartPole-v1",
+        help="Environment name (e.g. CartPole-v1, MountainCar-v0, Acrobot-v1)",
+    )
+    return parser.parse_args()
+
+
+args = parse_args()
+config = Config(env_name=args.env_name)
 if config.seed is not None:
     set_seed(config.seed)
 
