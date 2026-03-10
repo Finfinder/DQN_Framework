@@ -1,3 +1,4 @@
+import argparse
 import gymnasium as gym
 from pathlib import Path
 import torch
@@ -5,9 +6,33 @@ import torch
 from models.dqn_network import DQN
 from config.config import Config
 
-config = Config()
 
-env = gym.make(config.env_name,render_mode="human")
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Run a trained DQN agent for a supported Gymnasium environment."
+    )
+    parser.add_argument(
+        "env_name",
+        nargs="?",
+        default="CartPole-v1",
+        choices=sorted(Config.ENV_CONFIG.keys()),
+        help="Environment name",
+    )
+    parser.add_argument(
+        "--play-episodes",
+        type=int,
+        default=None,
+        help="Number of episodes to play (overrides config default)",
+    )
+    return parser.parse_args()
+
+
+args = parse_args()
+config = Config(env_name=args.env_name)
+if args.play_episodes is not None:
+    config.play_episodes = args.play_episodes
+
+env = gym.make(config.env_name, render_mode="human")
 
 state_size = env.observation_space.shape[0]
 action_size = env.action_space.n
@@ -17,7 +42,8 @@ model = DQN(state_size, action_size, hidden_layers=config.hidden_layers).to(conf
 model_path = Path(config.model_path)
 if not model_path.exists():
     raise FileNotFoundError(
-        f"Model file not found: {model_path}. Run train.py first to generate weights."
+        f"Model for '{config.env_name}' not found: {model_path}. "
+        f"Run: python train.py {config.env_name}"
     )
 
 model.load_state_dict(
@@ -25,6 +51,8 @@ model.load_state_dict(
 )
 
 model.eval()
+
+print(f"Playing in {config.env_name} for {config.play_episodes} episode(s)")
 
 for episode in range(config.play_episodes):
 

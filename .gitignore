@@ -3,10 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Trained models and generated charts
-*.pth
-training_curve*.png
-
 # Virtual environments
 .venv/
 venv/

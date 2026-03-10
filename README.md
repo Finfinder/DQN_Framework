@@ -52,6 +52,8 @@ python train.py Acrobot-v1
 
 ```bash
 python play.py
+python play.py CartPole-v1
+python play.py MountainCar-v0 --play-episodes 10
 ```
 
 ## Jak to dziala (skrot)
