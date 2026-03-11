@@ -1,7 +1,6 @@
 import random
 import torch
 import torch.optim as optim
-import torch.nn as nn
 
 class DQNAgent:
 
@@ -13,7 +12,6 @@ class DQNAgent:
         self.config = config
 
         self.optimizer = optim.Adam(policy_net.parameters(), lr=config.lr)
-        self.criterion = nn.MSELoss()
 
     def select_action(self, state, epsilon, env):
         if random.random() < epsilon:
@@ -25,11 +23,20 @@ class DQNAgent:
 
         return q_values.argmax().item()
 
-    def train_step(self):
+    def train_step(self, beta=0.4):
         if len(self.memory) < self.config.batch_size:
             return None
 
-        states, actions, rewards, next_states, dones = self.memory.sample(self.config.batch_size)
+        if self.config.use_per:
+            states, actions, rewards, next_states, dones, indices, is_weights = self.memory.sample(
+                self.config.batch_size,
+                beta=beta,
+            )
+            is_weights = torch.FloatTensor(is_weights).to(self.config.device)
+        else:
+            states, actions, rewards, next_states, dones = self.memory.sample(self.config.batch_size)
+            indices = None
+            is_weights = None
 
         states = torch.FloatTensor(states).to(self.config.device)
         next_states = torch.FloatTensor(next_states).to(self.config.device)
@@ -49,7 +56,13 @@ class DQNAgent:
 
             expected_q = rewards + self.config.gamma * next_q * (1 - dones)
 
-        loss = self.criterion(q_value, expected_q)
+        td_errors = expected_q - q_value
+        sample_losses = td_errors.pow(2)
+
+        if self.config.use_per:
+            loss = (is_weights * sample_losses).mean()
+        else:
+            loss = sample_losses.mean()
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -63,9 +76,17 @@ class DQNAgent:
                 self.config.tau*param.data + (1-self.config.tau)*target_param.data
             )
 
-        return {
+        stats = {
             "loss": float(loss.item()),
             "q_mean": float(q_value.mean().item()),
             "target_q_mean": float(expected_q.mean().item()),
             "q_max_mean": float(q_values.max(dim=1).values.mean().item()),
+            "td_error_mean": float(td_errors.abs().mean().item()),
         }
+
+        if self.config.use_per:
+            stats["indices"] = indices
+            stats["td_errors"] = td_errors.detach().abs().cpu().numpy()
+            stats["is_weight_mean"] = float(is_weights.mean().item())
+
+        return stats

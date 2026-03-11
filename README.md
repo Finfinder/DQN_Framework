@@ -14,7 +14,7 @@ Aktualnie projekt wspiera konfiguracje:
 - `play.py`: uruchamianie wytrenowanego modelu w trybie `render_mode="human"`.
 - `agents/dqn_agent.py`: logika agenta (epsilon-greedy, krok treningowy, soft update target network).
 - `models/dqn_network.py`: MLP budowany dynamicznie z listy warstw ukrytych.
-- `memory/replay_buffer.py`: replay buffer oparty o `deque`.
+- `memory/replay_buffer.py`: replay buffer w trybie `uniform` lub `Prioritized Experience Replay (PER)`.
 - `config/config.py`: centralna konfiguracja hiperparametrow i presetow per srodowisko.
 
 ## Wymagania
@@ -81,6 +81,14 @@ Najwazniejsze pola:
 - `solved_threshold`
 - `model_path`, `plot_path`, `play_episodes`
 
+Parametry PER:
+
+- `use_per`: wlacza/wylacza PER (domyslnie `True`).
+- `per_alpha`: sila priorytetyzacji (0.0 = uniform sampling).
+- `per_beta_start`: poczatkowa wartosc beta dla wag IS.
+- `per_beta_frames`: liczba krokow do annealingu beta do 1.0.
+- `per_eps`: mala stala dodawana do priorytetu dla stabilnosci numerycznej.
+
 Domyslnie `python train.py` uruchamia preset dla `CartPole-v1`.
 
 Aby uruchomic trening dla innego wspieranego srodowiska, podaj je jako argument:
@@ -118,6 +126,10 @@ Logowane metryki obejmuja m.in.:
 - `train/q_mean`
 - `train/q_max_mean`
 - `train/target_q_mean`
+- `train/td_error_mean`
+- `train/beta` (gdy `use_per=True`)
+- `train/is_weight_mean` (gdy `use_per=True`)
+- `train/priority_mean` (gdy `use_per=True`)
 
 CSV zawiera kolumny:
 
@@ -125,6 +137,10 @@ CSV zawiera kolumny:
 - `reward`
 - `avg100`
 - `epsilon`
+- `beta`
+- `is_weight_mean`
+- `td_error_mean`
+- `priority_mean`
 
 Przykladowe artefakty widoczne w repo:
 

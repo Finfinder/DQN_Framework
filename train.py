@@ -54,7 +54,12 @@ target_net = DQN(state_size, action_size, hidden_layers=config.hidden_layers).to
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
-memory = ReplayBuffer(config.memory_size)
+memory = ReplayBuffer(
+    config.memory_size,
+    use_per=config.use_per,
+    alpha=config.per_alpha,
+    eps=config.per_eps,
+)
 
 agent = DQNAgent(policy_net, target_net, memory, config)
 
@@ -76,7 +81,16 @@ metrics_dir.mkdir(parents=True, exist_ok=True)
 metrics_file = metrics_dir / f"{safe_env_name}_{safe_model_name}_{run_started_at}.csv"
 metrics_fp = metrics_file.open("w", newline="", encoding="utf-8")
 metrics_writer = csv.writer(metrics_fp)
-metrics_writer.writerow(["episode", "reward", "avg100", "epsilon"])
+metrics_writer.writerow([
+    "episode",
+    "reward",
+    "avg100",
+    "epsilon",
+    "beta",
+    "is_weight_mean",
+    "td_error_mean",
+    "priority_mean",
+])
 
 print(f"TensorBoard logs: {run_log_dir}")
 print(f"CSV metrics: {metrics_file}")
@@ -93,6 +107,9 @@ try:
         total_reward = 0.0
         episode_losses = []
         episode_q_means = []
+        episode_is_weight_means = []
+        episode_td_error_means = []
+        episode_betas = []
 
         while not done:
 
@@ -114,7 +131,12 @@ try:
             step_count += 1
 
             if len(memory) >= config.min_replay_size and step_count % config.train_every_steps == 0:
-                train_stats = agent.train_step()
+                beta = 1.0
+                if config.use_per:
+                    progress = min(1.0, step_count / max(1, config.per_beta_frames))
+                    beta = config.per_beta_start + progress * (1.0 - config.per_beta_start)
+
+                train_stats = agent.train_step(beta=beta)
                 if train_stats is not None:
                     episode_losses.append(train_stats["loss"])
                     episode_q_means.append(train_stats["q_mean"])
@@ -122,6 +144,21 @@ try:
                     writer.add_scalar("train/q_mean", train_stats["q_mean"], step_count)
                     writer.add_scalar("train/q_max_mean", train_stats["q_max_mean"], step_count)
                     writer.add_scalar("train/target_q_mean", train_stats["target_q_mean"], step_count)
+                    writer.add_scalar("train/td_error_mean", train_stats["td_error_mean"], step_count)
+
+                    if config.use_per and "indices" in train_stats:
+                        memory.update_priorities(train_stats["indices"], train_stats["td_errors"])
+
+                        priority_mean = memory.mean_priority()
+                        is_weight_mean = float(train_stats.get("is_weight_mean", 0.0))
+
+                        episode_betas.append(beta)
+                        episode_is_weight_means.append(is_weight_mean)
+                        episode_td_error_means.append(train_stats["td_error_mean"])
+
+                        writer.add_scalar("train/beta", beta, step_count)
+                        writer.add_scalar("train/is_weight_mean", is_weight_mean, step_count)
+                        writer.add_scalar("train/priority_mean", priority_mean, step_count)
 
         epsilon = max(config.epsilon_min, epsilon * config.epsilon_decay)
 
@@ -131,11 +168,30 @@ try:
         writer.add_scalar("episode/reward", total_reward, episode)
         writer.add_scalar("episode/avg100", avg_reward_100, episode)
         writer.add_scalar("episode/epsilon", epsilon, episode)
-        metrics_writer.writerow([episode, total_reward, avg_reward_100, epsilon])
+        episode_beta = float(np.mean(episode_betas)) if episode_betas else 1.0
+        episode_is_weight = float(np.mean(episode_is_weight_means)) if episode_is_weight_means else 1.0
+        episode_td_error = float(np.mean(episode_td_error_means)) if episode_td_error_means else 0.0
+        episode_priority = memory.mean_priority() if config.use_per else 0.0
+
+        metrics_writer.writerow([
+            episode,
+            total_reward,
+            avg_reward_100,
+            epsilon,
+            episode_beta,
+            episode_is_weight,
+            episode_td_error,
+            episode_priority,
+        ])
         if episode_losses:
             writer.add_scalar("episode/loss", float(np.mean(episode_losses)), episode)
         if episode_q_means:
             writer.add_scalar("episode/q_mean", float(np.mean(episode_q_means)), episode)
+        if config.use_per and episode_betas:
+            writer.add_scalar("episode/beta", episode_beta, episode)
+            writer.add_scalar("episode/is_weight_mean", episode_is_weight, episode)
+            writer.add_scalar("episode/td_error_mean", episode_td_error, episode)
+            writer.add_scalar("episode/priority_mean", episode_priority, episode)
 
         print(
             f"Episode {episode}, Reward: {total_reward:.1f}, "

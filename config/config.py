@@ -21,6 +21,11 @@ class Config:
         "play_episodes": 5,
         "model_path": "model.pth",
         "plot_path": "training_curve.png",
+        "use_per": True,
+        "per_alpha": 0.6,
+        "per_beta_start": 0.4,
+        "per_beta_frames": 100000,
+        "per_eps": 1e-6,
     }
 
     ENV_CONFIG = {
@@ -35,7 +40,7 @@ class Config:
         "MountainCar-v0": {
             "hidden_layers": [128, 128],
             "num_episodes": 2000,
-            "solved_threshold": -110.0,
+            "solved_threshold": -100.0,
             "model_path": "dqn_mountaincar.pth",
             "plot_path": "training_curve_mountaincar.png",
         },
@@ -75,5 +80,10 @@ class Config:
         self.play_episodes = merged["play_episodes"]
         self.model_path = merged["model_path"]
         self.plot_path = merged["plot_path"]
+        self.use_per = merged["use_per"]
+        self.per_alpha = merged["per_alpha"]
+        self.per_beta_start = merged["per_beta_start"]
+        self.per_beta_frames = merged["per_beta_frames"]
+        self.per_eps = merged["per_eps"]
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
