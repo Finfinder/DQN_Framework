@@ -37,7 +37,7 @@ env = gym.make(config.env_name, render_mode="human")
 state_size = env.observation_space.shape[0]
 action_size = env.action_space.n
 
-model = DQN(state_size, action_size, hidden_layers=config.hidden_layers).to(config.device)
+model = DQN(state_size, action_size, hidden_layers=config.hidden_layers, dueling=config.use_dueling).to(config.device)
 
 model_path = Path(config.model_path)
 if not model_path.exists():

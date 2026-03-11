@@ -26,6 +26,7 @@ class Config:
         "per_beta_start": 0.4,
         "per_beta_frames": 100000,
         "per_eps": 1e-6,
+        "use_dueling": True,
     }
 
     ENV_CONFIG = {
@@ -78,12 +79,31 @@ class Config:
         self.solved_threshold = merged["solved_threshold"]
         self.plot_window = merged["plot_window"]
         self.play_episodes = merged["play_episodes"]
-        self.model_path = merged["model_path"]
-        self.plot_path = merged["plot_path"]
         self.use_per = merged["use_per"]
         self.per_alpha = merged["per_alpha"]
         self.per_beta_start = merged["per_beta_start"]
         self.per_beta_frames = merged["per_beta_frames"]
         self.per_eps = merged["per_eps"]
+        self.use_dueling = merged["use_dueling"]
+        
+        # Generate suffix for model paths based on use_dueling flag
+        self.suffix = "_dueling" if self.use_dueling else "_standard"
+        
+        # Apply suffix to model and plot paths
+        model_path_base = merged["model_path"]
+        plot_path_base = merged["plot_path"]
+        
+        # Insert suffix before extension
+        if "." in model_path_base:
+            model_parts = model_path_base.rsplit(".", 1)
+            self.model_path = f"{model_parts[0]}{self.suffix}.{model_parts[1]}"
+        else:
+            self.model_path = f"{model_path_base}{self.suffix}"
+        
+        if "." in plot_path_base:
+            plot_parts = plot_path_base.rsplit(".", 1)
+            self.plot_path = f"{plot_parts[0]}{self.suffix}.{plot_parts[1]}"
+        else:
+            self.plot_path = f"{plot_path_base}{self.suffix}"
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

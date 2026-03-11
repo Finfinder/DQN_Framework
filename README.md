@@ -89,6 +89,10 @@ Parametry PER:
 - `per_beta_frames`: liczba krokow do annealingu beta do 1.0.
 - `per_eps`: mala stala dodawana do priorytetu dla stabilnosci numerycznej.
 
+Parametry architektury:
+
+- `use_dueling`: wlacza/wylacza Dueling DQN (domyslnie `False`). Gdy `True`, siec rozdziela estymacje wartosci stanu i przewagi akcji dla lepszej generalizacji. Wszystkie artefakty (model, logi, metryki, wykresy) sa przechowywane oddzielnie dla standardowego DQN i Dueling DQN przy uzyciu sufixu (`_standard` lub `_dueling`).
+
 Domyslnie `python train.py` uruchamia preset dla `CartPole-v1`.
 
 Aby uruchomic trening dla innego wspieranego srodowiska, podaj je jako argument:
@@ -106,8 +110,10 @@ Podczas treningu zapisywane sa:
 
 - plik wag modelu (`*.pth`) do `config.model_path`,
 - wykres uczenia (`*.png`) do `config.plot_path`.
-- logi TensorBoard do katalogu `logs/<env_name>_<YYYYMMDD-HHMMSS>/`.
+- logi TensorBoard do katalogu `logs/<env_name><suffix>_<YYYYMMDD-HHMMSS>/`.
 - metryki epizodow do CSV: `metrics/<env_name>_<model_name>_<YYYYMMDD-HHMMSS>.csv`.
+
+Przykladowy sufiks: `_standard` dla standardowego DQN, `_dueling` dla Dueling DQN. Sufiks jest automatycznie dodawany do nazw modelu i wykresu, a przez to posrednio rowniez widoczny w nazwach metryk.
 
 Aby podejrzec metryki podczas/po treningu:
 

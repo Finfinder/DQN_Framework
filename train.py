@@ -48,8 +48,8 @@ if config.seed is not None:
 state_size = env.observation_space.shape[0]
 action_size = env.action_space.n
 
-policy_net = DQN(state_size, action_size, hidden_layers=config.hidden_layers).to(config.device)
-target_net = DQN(state_size, action_size, hidden_layers=config.hidden_layers).to(config.device)
+policy_net = DQN(state_size, action_size, hidden_layers=config.hidden_layers, dueling=config.use_dueling).to(config.device)
+target_net = DQN(state_size, action_size, hidden_layers=config.hidden_layers, dueling=config.use_dueling).to(config.device)
 
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
@@ -72,7 +72,7 @@ saved_best = False
 run_started_at = datetime.now().strftime("%Y%m%d-%H%M%S")
 safe_env_name = config.env_name.replace("/", "_")
 safe_model_name = Path(config.model_path).stem.replace("/", "_")
-run_log_dir = Path("logs") / f"{safe_env_name}_{run_started_at}"
+run_log_dir = Path("logs") / f"{safe_env_name}{config.suffix}_{run_started_at}"
 run_log_dir.mkdir(parents=True, exist_ok=True)
 writer = SummaryWriter(log_dir=str(run_log_dir))
 
