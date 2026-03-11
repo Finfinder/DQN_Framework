@@ -3,7 +3,7 @@ import torch
 class Config:
 
     DEFAULTS = {
-        "seed": None,
+        "seed": 42,
         "gamma": 0.99,
         "lr": 0.001,
         "batch_size": 64,
@@ -40,8 +40,16 @@ class Config:
         },
         "MountainCar-v0": {
             "hidden_layers": [128, 128],
-            "num_episodes": 2000,
+            "num_episodes": 2500,
             "solved_threshold": -100.0,
+            "lr": 0.0005,
+            "epsilon_decay": 0.997,
+            "epsilon_min": 0.01,
+            "memory_size": 50000,
+            "tau": 0.005,
+            "batch_size": 128,
+            "train_every_steps": 2,
+            "per_alpha": 0.7,
             "model_path": "dqn_mountaincar.pth",
             "plot_path": "training_curve_mountaincar.png",
         },
