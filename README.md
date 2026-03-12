@@ -11,10 +11,12 @@ Aktualnie projekt wspiera konfiguracje:
 ## Co zawiera projekt
 
 - `train.py`: trening DQN + zapis najlepszego modelu + wykres postepu.
+- `evaluate.py`: ewaluacja wytrenowanego modelu (greedy policy, epsilon=0) z podsumowaniem statystyk.
 - `play.py`: uruchamianie wytrenowanego modelu w trybie `render_mode="human"`.
 - `agents/dqn_agent.py`: logika agenta (epsilon-greedy, krok treningowy, soft update target network).
 - `models/dqn_network.py`: MLP budowany dynamicznie z listy warstw ukrytych.
 - `memory/replay_buffer.py`: replay buffer w trybie `uniform` lub `Prioritized Experience Replay (PER)`.
+- `utils/evaluate.py`: wspolna funkcja `evaluate_policy()` uzywana przez `evaluate.py` i `train.py`.
 - `config/config.py`: centralna konfiguracja hiperparametrow i presetow per srodowisko.
 
 ## Wymagania
@@ -57,6 +59,15 @@ python play.py CartPole-v1
 python play.py MountainCar-v0 --play-episodes 10
 ```
 
+1. Ewaluacja wytrenowanego modelu (greedy policy, epsilon=0):
+
+```bash
+python evaluate.py CartPole-v1
+python evaluate.py MountainCar-v0 --episodes 50
+python evaluate.py Acrobot-v1 --episodes 100 --render
+python evaluate.py CartPole-v1 --render --render-episodes 5
+```
+
 ## Jak to dziala (skrot)
 
 - Agent wybiera akcje przez **epsilon-greedy**.
@@ -92,6 +103,11 @@ Parametry PER:
 Parametry architektury:
 
 - `use_dueling`: wlacza/wylacza Dueling DQN (domyslnie `False`). Gdy `True`, siec rozdziela estymacje wartosci stanu i przewagi akcji dla lepszej generalizacji. Wszystkie artefakty (model, logi, metryki, wykresy) sa przechowywane oddzielnie dla standardowego DQN i Dueling DQN przy uzyciu sufixu (`_standard` lub `_dueling`).
+
+Parametry ewaluacji:
+
+- `eval_every`: co ile epizodow treningowych uruchamiana jest ewaluacja greedy policy (domyslnie `100`).
+- `eval_episodes`: liczba epizodow ewaluacyjnych (domyslnie `10`).
 
 Domyslnie `python train.py` uruchamia preset dla `CartPole-v1`.
 
@@ -136,6 +152,10 @@ Logowane metryki obejmuja m.in.:
 - `train/beta` (gdy `use_per=True`)
 - `train/is_weight_mean` (gdy `use_per=True`)
 - `train/priority_mean` (gdy `use_per=True`)
+- `eval/mean_reward` (greedy policy)
+- `eval/std_reward` (greedy policy)
+- `eval/min_reward` (greedy policy)
+- `eval/max_reward` (greedy policy)
 
 CSV zawiera kolumny:
 
@@ -147,6 +167,14 @@ CSV zawiera kolumny:
 - `is_weight_mean`
 - `td_error_mean`
 - `priority_mean`
+
+Oddzielny plik CSV ewaluacyjny (`*_eval.csv`) zawiera kolumny:
+
+- `episode`
+- `mean_reward`
+- `std_reward`
+- `min_reward`
+- `max_reward`
 
 Przykladowe artefakty widoczne w repo:
 

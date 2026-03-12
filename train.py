@@ -13,6 +13,7 @@ from config.config import Config
 from models.dqn_network import DQN
 from memory.replay_buffer import ReplayBuffer
 from agents.dqn_agent import DQNAgent
+from utils.evaluate import evaluate_policy
 
 
 def set_seed(seed):
@@ -92,8 +93,20 @@ metrics_writer.writerow([
     "priority_mean",
 ])
 
+eval_metrics_file = metrics_dir / f"{safe_env_name}_{safe_model_name}_{run_started_at}_eval.csv"
+eval_metrics_fp = eval_metrics_file.open("w", newline="", encoding="utf-8")
+eval_metrics_writer = csv.writer(eval_metrics_fp)
+eval_metrics_writer.writerow([
+    "episode",
+    "mean_reward",
+    "std_reward",
+    "min_reward",
+    "max_reward",
+])
+
 print(f"TensorBoard logs: {run_log_dir}")
 print(f"CSV metrics: {metrics_file}")
+print(f"CSV eval metrics: {eval_metrics_file}")
 
 try:
     for episode in range(1, config.num_episodes + 1):
@@ -203,6 +216,35 @@ try:
             torch.save(policy_net.state_dict(), config.model_path)
             saved_best = True
 
+        if episode % config.eval_every == 0:
+            policy_net.eval()
+            eval_stats = evaluate_policy(
+                policy_net, config.env_name, config.eval_episodes,
+                config.device, seed=config.seed,
+            )
+            policy_net.train()
+
+            writer.add_scalar("eval/mean_reward", eval_stats["mean_reward"], episode)
+            writer.add_scalar("eval/std_reward", eval_stats["std_reward"], episode)
+            writer.add_scalar("eval/min_reward", eval_stats["min_reward"], episode)
+            writer.add_scalar("eval/max_reward", eval_stats["max_reward"], episode)
+
+            eval_metrics_writer.writerow([
+                episode,
+                eval_stats["mean_reward"],
+                eval_stats["std_reward"],
+                eval_stats["min_reward"],
+                eval_stats["max_reward"],
+            ])
+
+            print(
+                f"  [EVAL] Episodes: {config.eval_episodes}, "
+                f"Mean: {eval_stats['mean_reward']:.1f}, "
+                f"Std: {eval_stats['std_reward']:.1f}, "
+                f"Min: {eval_stats['min_reward']:.1f}, "
+                f"Max: {eval_stats['max_reward']:.1f}"
+            )
+
         if len(episode_rewards) >= 100 and avg_reward_100 > config.solved_threshold:
             torch.save(policy_net.state_dict(), config.model_path)
             saved_best = True
@@ -214,6 +256,7 @@ try:
 finally:
     writer.close()
     metrics_fp.close()
+    eval_metrics_fp.close()
 
 if not saved_best:
     torch.save(policy_net.state_dict(), config.model_path)

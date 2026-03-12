@@ -27,6 +27,8 @@ class Config:
         "per_beta_frames": 100000,
         "per_eps": 1e-6,
         "use_dueling": True,
+        "eval_every": 100,
+        "eval_episodes": 10,
     }
 
     ENV_CONFIG = {
@@ -101,6 +103,8 @@ class Config:
         self.per_beta_frames = merged["per_beta_frames"]
         self.per_eps = merged["per_eps"]
         self.use_dueling = merged["use_dueling"]
+        self.eval_every = merged["eval_every"]
+        self.eval_episodes = merged["eval_episodes"]
         
         # Generate suffix for model paths based on use_dueling flag
         self.suffix = "_dueling" if self.use_dueling else "_standard"
