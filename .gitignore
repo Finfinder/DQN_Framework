@@ -16,6 +16,13 @@ ENV/
 logs/
 metrics/
 
+# Local AI/editor customization
+.github/skills/
+.github/agents/
+.github/prompts/
+.github/instructions/
+.github/chatmodes/
+
 # OS/editor files
 .DS_Store
 Thumbs.db
