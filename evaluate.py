@@ -1,4 +1,6 @@
 import argparse
+import csv
+from datetime import datetime
 from pathlib import Path
 import gymnasium as gym
 import torch
@@ -102,6 +104,27 @@ def main():
     print(f"  Min reward:  {eval_stats['min_reward']:.2f}")
     print(f"  Max reward:  {eval_stats['max_reward']:.2f}")
     print("-" * 60)
+
+    # Save evaluation results to CSV
+    metrics_dir = Path("metrics")
+    metrics_dir.mkdir(parents=True, exist_ok=True)
+    safe_env = config.env_name.replace("/", "_")
+    safe_model = model_path.stem.replace("/", "_")
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    eval_csv_path = metrics_dir / f"{safe_env}_{safe_model}_standalone_eval_{timestamp}.csv"
+
+    with eval_csv_path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["mean_reward", "std_reward", "min_reward", "max_reward", "episodes"])
+        writer.writerow([
+            f"{eval_stats['mean_reward']:.4f}",
+            f"{eval_stats['std_reward']:.4f}",
+            f"{eval_stats['min_reward']:.4f}",
+            f"{eval_stats['max_reward']:.4f}",
+            args.episodes,
+        ])
+
+    print(f"Saved eval CSV: {eval_csv_path}")
 
     if args.render:
         print(f"\nRendering {args.render_episodes} episode(s)...\n")
