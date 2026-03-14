@@ -21,6 +21,8 @@ class Config:
         "play_episodes": 5,
         "model_path": "model.pth",
         "plot_path": "training_curve.png",
+        "buffer_type": "prioritized",
+        "nstep_n": 3,
         "use_per": True,
         "per_alpha": 0.6,
         "per_beta_start": 0.4,
@@ -42,7 +44,7 @@ class Config:
         },
         "MountainCar-v0": {
             "hidden_layers": [128, 128],
-            "num_episodes": 2500,
+            "num_episodes": 3500,
             "solved_threshold": -100.0,
             "lr": 0.0005,
             "epsilon_decay": 0.997,
@@ -50,8 +52,9 @@ class Config:
             "memory_size": 50000,
             "tau": 0.005,
             "batch_size": 128,
-            "train_every_steps": 2,
+            "train_every_steps": 1,
             "per_alpha": 0.7,
+            "per_beta_frames": 50000,
             "model_path": "dqn_mountaincar.pth",
             "plot_path": "training_curve_mountaincar.png",
         },
@@ -97,7 +100,9 @@ class Config:
         self.solved_threshold = merged["solved_threshold"]
         self.plot_window = merged["plot_window"]
         self.play_episodes = merged["play_episodes"]
-        self.use_per = merged["use_per"]
+        self.buffer_type = merged["buffer_type"]
+        self.nstep_n = merged["nstep_n"]
+        self.use_per = (self.buffer_type == "prioritized")
         self.per_alpha = merged["per_alpha"]
         self.per_beta_start = merged["per_beta_start"]
         self.per_beta_frames = merged["per_beta_frames"]

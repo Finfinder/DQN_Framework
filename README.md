@@ -15,7 +15,7 @@ Aktualnie projekt wspiera konfiguracje:
 - `play.py`: uruchamianie wytrenowanego modelu w trybie `render_mode="human"`.
 - `agents/dqn_agent.py`: logika agenta (epsilon-greedy, krok treningowy, soft update target network).
 - `models/dqn_network.py`: MLP budowany dynamicznie z listy warstw ukrytych.
-- `memory/replay_buffer.py`: replay buffer w trybie `uniform` lub `Prioritized Experience Replay (PER)`.
+- `memory/replay_buffer.py`: trzy warianty replay bufora — `ReplayBuffer` (uniform), `PrioritizedReplayBuffer` (PER), `NstepReplayBuffer` (N-step returns) — z factory `create_buffer(config)`.
 - `utils/evaluate.py`: wspolna funkcja `evaluate_policy()` uzywana przez `evaluate.py` i `train.py`.
 - `config/config.py`: centralna konfiguracja hiperparametrow i presetow per srodowisko.
 
@@ -71,7 +71,7 @@ python evaluate.py CartPole-v1 --render --render-episodes 5
 ## Jak to dziala (skrot)
 
 - Agent wybiera akcje przez **epsilon-greedy**.
-- Przejscia trafiaja do **Replay Buffer**.
+- Przejscia trafiaja do **Replay Buffer** (uniform, PER lub N-step — konfigurowalny przez `buffer_type`).
 - Update sieci wykorzystuje wariant **Double DQN**:
   - wybor akcji `argmax` przez `policy_net`,
   - ewaluacja tej akcji przez `target_net`.
@@ -92,9 +92,19 @@ Najwazniejsze pola:
 - `solved_threshold`
 - `model_path`, `plot_path`, `play_episodes`
 
-Parametry PER:
+Replay Buffer:
 
-- `use_per`: wlacza/wylacza PER (domyslnie `True`).
+- `buffer_type`: typ bufora — `"replay"` (uniform), `"prioritized"` (PER), `"nstep"` (N-step returns). Domyslnie `"prioritized"`. Automatycznie ustawia `use_per`.
+- `nstep_n`: liczba krokow N-step return (tylko gdy `buffer_type: "nstep"`). Domyslnie `3`.
+
+| `buffer_type` | Klasa | Opis |
+|---------------|-------|------|
+| `"replay"` | `ReplayBuffer` | Uniform sampling z deque. Prosty, szybki. |
+| `"prioritized"` | `PrioritizedReplayBuffer` | PER z IS weights. Lepszy dla sparse rewards. |
+| `"nstep"` | `NstepReplayBuffer` | N-step returns + uniform. Przyspiesza propagacje wartosci. |
+
+Parametry PER (aktywne gdy `buffer_type: "prioritized"`):
+
 - `per_alpha`: sila priorytetyzacji (0.0 = uniform sampling).
 - `per_beta_start`: poczatkowa wartosc beta dla wag IS.
 - `per_beta_frames`: liczba krokow do annealingu beta do 1.0.
@@ -149,9 +159,9 @@ Logowane metryki obejmuja m.in.:
 - `train/q_max_mean`
 - `train/target_q_mean`
 - `train/td_error_mean`
-- `train/beta` (gdy `use_per=True`)
-- `train/is_weight_mean` (gdy `use_per=True`)
-- `train/priority_mean` (gdy `use_per=True`)
+- `train/beta` (gdy `buffer_type: "prioritized"`)
+- `train/is_weight_mean` (gdy `buffer_type: "prioritized"`)
+- `train/priority_mean` (gdy `buffer_type: "prioritized"`)
 - `eval/mean_reward` (greedy policy)
 - `eval/std_reward` (greedy policy)
 - `eval/min_reward` (greedy policy)

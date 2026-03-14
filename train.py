@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from config.config import Config
 from models.dqn_network import DQN
-from memory.replay_buffer import ReplayBuffer
+from memory.replay_buffer import create_buffer
 from agents.dqn_agent import DQNAgent
 from utils.evaluate import evaluate_policy
 
@@ -34,11 +34,19 @@ def parse_args():
         default="CartPole-v1",
         help="Environment name (e.g. CartPole-v1, MountainCar-v0, Acrobot-v1)",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Override the seed from config (useful for reliability testing)",
+    )
     return parser.parse_args()
 
 
 args = parse_args()
 config = Config(env_name=args.env_name)
+if args.seed is not None:
+    config.seed = args.seed
 if config.seed is not None:
     set_seed(config.seed)
 
@@ -55,12 +63,7 @@ target_net = DQN(state_size, action_size, hidden_layers=config.hidden_layers, du
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
-memory = ReplayBuffer(
-    config.memory_size,
-    use_per=config.use_per,
-    alpha=config.per_alpha,
-    eps=config.per_eps,
-)
+memory = create_buffer(config)
 
 agent = DQNAgent(policy_net, target_net, memory, config)
 
