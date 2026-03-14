@@ -14,6 +14,7 @@ from models.dqn_network import DQN
 from memory.replay_buffer import create_buffer
 from agents.dqn_agent import DQNAgent
 from utils.evaluate import evaluate_policy
+from version import __version__
 
 
 def set_seed(seed):
@@ -39,6 +40,11 @@ def parse_args():
         type=int,
         default=None,
         help="Override the seed from config (useful for reliability testing)",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     return parser.parse_args()
 
@@ -79,6 +85,7 @@ safe_model_name = Path(config.model_path).stem.replace("/", "_")
 run_log_dir = Path("logs") / f"{safe_env_name}{config.suffix}_{run_started_at}"
 run_log_dir.mkdir(parents=True, exist_ok=True)
 writer = SummaryWriter(log_dir=str(run_log_dir))
+writer.add_text("meta/version", __version__)
 
 metrics_dir = Path("metrics")
 metrics_dir.mkdir(parents=True, exist_ok=True)
@@ -107,6 +114,7 @@ eval_metrics_writer.writerow([
     "max_reward",
 ])
 
+print(f"DQN Framework v{__version__}")
 print(f"TensorBoard logs: {run_log_dir}")
 print(f"CSV metrics: {metrics_file}")
 print(f"CSV eval metrics: {eval_metrics_file}")

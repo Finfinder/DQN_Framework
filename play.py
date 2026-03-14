@@ -5,6 +5,7 @@ import torch
 
 from models.dqn_network import DQN
 from config.config import Config
+from version import __version__
 
 
 def parse_args():
@@ -23,6 +24,11 @@ def parse_args():
         type=int,
         default=None,
         help="Number of episodes to play (overrides config default)",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     return parser.parse_args()
 
@@ -52,6 +58,7 @@ model.load_state_dict(
 
 model.eval()
 
+print(f"DQN Framework v{__version__}")
 print(f"Playing in {config.env_name} for {config.play_episodes} episode(s)")
 
 for episode in range(config.play_episodes):

@@ -8,6 +8,7 @@ import torch
 from models.dqn_network import DQN
 from config.config import Config
 from utils.evaluate import evaluate_policy
+from version import __version__
 
 
 def parse_args():
@@ -37,6 +38,11 @@ def parse_args():
         type=int,
         default=3,
         help="Number of episodes to render when --render is set (default: 3)",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     return parser.parse_args()
 
@@ -92,6 +98,7 @@ def main():
         torch.load(model_path, weights_only=True, map_location=config.device)
     )
 
+    print(f"DQN Framework v{__version__}")
     print(f"Evaluating {config.env_name} | model: {model_path} | episodes: {args.episodes}")
     print("-" * 60)
 
