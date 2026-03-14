@@ -5,6 +5,10 @@ Wszystkie istotne zmiany w projekcie DQN Framework są dokumentowane w tym pliku
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/),
 projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [1.0.1] - Unreleased
+
+### Zmienione
+
 ## [1.0.0] - 2026-03-14
 
 ### Dodane
