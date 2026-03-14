@@ -51,6 +51,12 @@ python train.py MountainCar-v0
 python train.py Acrobot-v1
 ```
 
+1. Trening z okreslonym seedem (nadpisuje wartosc z configu):
+
+```bash
+python train.py MountainCar-v0 --seed 123
+```
+
 1. Ogladanie wytrenowanego agenta:
 
 ```bash
@@ -194,4 +200,4 @@ Przykladowe artefakty widoczne w repo:
 ## Uwagi
 
 - `play.py` rzuci `FileNotFoundError`, jesli model nie istnieje.
-- Jesli chcesz powtarzalnych wynikow, ustaw `seed` w `Config.DEFAULTS`.
+- Jesli chcesz powtarzalnych wynikow, ustaw `seed` w `Config.DEFAULTS` lub uzyj flagi `--seed` przy wywolaniu `train.py` (np. `python train.py MountainCar-v0 --seed 42`). Flaga `--seed` nadpisuje wartosc z configu.
