@@ -1,0 +1,24 @@
+# Core RL & Neural Networks
+torch==2.5.1+cu121
+torchaudio==2.5.1+cu121
+torchvision==0.20.1+cu121
+numpy==2.3.5
+
+# Gymnasium & Environments
+gymnasium==1.2.3
+ale-py==0.11.2
+pygame==2.6.1
+
+# Image Processing (required for CNN wrappers / Atari)
+opencv-python==4.13.0.92
+pillow==12.0.0
+
+# Visualization & Logging
+matplotlib==3.10.8
+tensorboard==2.20.0
+
+# Data Analysis (utils/analyze.py, analysis.ipynb)
+pandas
+
+# Torch install index (required for CUDA builds)
+# --extra-index-url https://download.pytorch.org/whl/cu121
