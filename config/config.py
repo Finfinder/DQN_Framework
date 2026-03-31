@@ -31,6 +31,15 @@ class Config:
         "use_dueling": True,
         "eval_every": 100,
         "eval_episodes": 10,
+        "network_type": "mlp",
+        "conv_layers": [(32, 8, 4), (64, 4, 2), (64, 3, 1)],
+        "cnn_hidden_dim": 512,
+        "frame_stack": 4,
+        "frame_size": [84, 84],
+        "frame_skip": 1,
+        "is_atari": False,
+        "target_update_freq": 0,
+        "adam_eps": 1e-8,
     }
 
     ENV_CONFIG = {
@@ -74,6 +83,31 @@ class Config:
             "model_path": "dqn_acrobot.pth",
             "plot_path": "training_curve_acrobot.png",
         },
+        "ALE/Pong-v5": {
+            "network_type": "cnn",
+            "is_atari": True,
+            "conv_layers": [(32, 8, 4), (64, 4, 2), (64, 3, 1)],
+            "cnn_hidden_dim": 1024,
+            "frame_stack": 4,
+            "frame_size": [84, 84],
+            "num_episodes": 25000,
+            "memory_size": 100000,
+            "lr": 0.0003,
+            "batch_size": 64,
+            "epsilon_decay": 0.9997,
+            "epsilon_min": 0.005,
+            "tau": 0.002,
+            "target_update_freq": 8000,
+            "adam_eps": 1.5e-4,
+            "train_every_steps": 4,
+            "frame_skip": 1,
+            "min_replay_size": 10000,
+            "per_alpha": 0.4,
+            "per_beta_frames": 1000000,
+            "solved_threshold": 18.0,
+            "model_path": "dqn_pong.pth",
+            "plot_path": "training_curve_pong.png",
+        },
     }
 
     def __init__(self, env_name="CartPole-v1"):
@@ -111,9 +145,20 @@ class Config:
         self.use_dueling = merged["use_dueling"]
         self.eval_every = merged["eval_every"]
         self.eval_episodes = merged["eval_episodes"]
+        self.network_type = merged["network_type"]
+        self.conv_layers = list(merged["conv_layers"])
+        self.cnn_hidden_dim = merged["cnn_hidden_dim"]
+        self.frame_stack = merged["frame_stack"]
+        self.frame_size = list(merged["frame_size"])
+        self.frame_skip = merged["frame_skip"]
+        self.is_atari = merged["is_atari"]
+        self.target_update_freq = merged["target_update_freq"]
+        self.adam_eps = merged["adam_eps"]
         
-        # Generate suffix for model paths based on use_dueling flag
-        self.suffix = "_dueling" if self.use_dueling else "_standard"
+        # Generate suffix for model paths based on network_type and use_dueling
+        arch = "_cnn" if self.network_type == "cnn" else ""
+        variant = "_dueling" if self.use_dueling else "_standard"
+        self.suffix = f"{arch}{variant}"
         
         # Apply suffix to model and plot paths
         model_path_base = merged["model_path"]

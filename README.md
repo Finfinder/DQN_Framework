@@ -7,6 +7,7 @@ Aktualnie projekt wspiera konfiguracje:
 - `CartPole-v1`
 - `MountainCar-v0`
 - `Acrobot-v1`
+- `ALE/Pong-v5` (CNN DQN)
 
 ## Co zawiera projekt
 
@@ -14,9 +15,11 @@ Aktualnie projekt wspiera konfiguracje:
 - `evaluate.py`: ewaluacja wytrenowanego modelu (greedy policy, epsilon=0) z podsumowaniem statystyk.
 - `play.py`: uruchamianie wytrenowanego modelu w trybie `render_mode="human"`.
 - `agents/dqn_agent.py`: logika agenta (epsilon-greedy, krok treningowy, soft update target network).
-- `models/dqn_network.py`: MLP budowany dynamicznie z listy warstw ukrytych.
+- `models/dqn_network.py`: MLP budowany dynamicznie z listy warstw ukrytych + factory `create_network(config, state_shape, action_dim)`.
+- `models/cnn_dqn_network.py`: CNN DQN z konfigurowalnymi warstwami Conv2d i obsluga Dueling.
 - `memory/replay_buffer.py`: trzy warianty replay bufora — `ReplayBuffer` (uniform), `PrioritizedReplayBuffer` (PER), `NstepReplayBuffer` (N-step returns) — z factory `create_buffer(config)`.
 - `utils/evaluate.py`: wspolna funkcja `evaluate_policy()` uzywana przez `evaluate.py` i `train.py`.
+- `utils/wrappers.py`: `make_env()` z `frame_skip`, `wrap_env()` z preprocessingiem obrazu (Atari + generyczne).
 - `config/config.py`: centralna konfiguracja hiperparametrow i presetow per srodowisko.
 
 ## Wymagania
@@ -25,6 +28,8 @@ Aktualnie projekt wspiera konfiguracje:
 - Pakiety Python:
   - `torch`
   - `gymnasium`
+  - `gymnasium[atari]`, `ale-py` (opcjonalne, wymagane dla srodowisk Atari)
+  - `opencv-python` (wymagane przez `AtariPreprocessing`)
   - `numpy`
   - `matplotlib`
   - `tensorboard`
@@ -33,6 +38,9 @@ Przykladowa instalacja:
 
 ```bash
 pip install torch gymnasium numpy matplotlib tensorboard
+
+# Opcjonalnie — dla srodowisk Atari (np. ALE/Pong-v5):
+pip install "gymnasium[atari]" ale-py opencv-python
 ```
 
 ## Szybki start
@@ -49,6 +57,7 @@ python train.py
 python train.py CartPole-v1
 python train.py MountainCar-v0
 python train.py Acrobot-v1
+python train.py ALE/Pong-v5
 ```
 
 1. Trening z okreslonym seedem (nadpisuje wartosc z configu):
@@ -81,8 +90,10 @@ python evaluate.py CartPole-v1 --render --render-episodes 5
 - Update sieci wykorzystuje wariant **Double DQN**:
   - wybor akcji `argmax` przez `policy_net`,
   - ewaluacja tej akcji przez `target_net`.
-- `target_net` jest aktualizowana metoda **soft update** z parametrem `tau`.
+- `target_net` jest aktualizowana metoda **soft update** z parametrem `tau` (lub **hard update** co `target_update_freq` krokow dla CNN).
 - Dla `CartPole-v1` przejscia koncowe (`terminated`) dostaja kara treningowa `-10.0`.
+- Funkcja straty: Smooth L1 (Huber loss).
+- Dla srodowisk obrazowych (np. `ALE/Pong-v5`) stosowana jest siec **CNN DQN** z preprocessingiem klatek (grayscale, resize, frame stacking).
 
 ## Konfiguracja
 
@@ -119,6 +130,14 @@ Parametry PER (aktywne gdy `buffer_type: "prioritized"`):
 Parametry architektury:
 
 - `use_dueling`: wlacza/wylacza Dueling DQN (domyslnie `False`). Gdy `True`, siec rozdziela estymacje wartosci stanu i przewagi akcji dla lepszej generalizacji. Wszystkie artefakty (model, logi, metryki, wykresy) sa przechowywane oddzielnie dla standardowego DQN i Dueling DQN przy uzyciu sufixu (`_standard` lub `_dueling`).
+- `network_type`: typ sieci — `"mlp"` (domyslnie) lub `"cnn"` (dla srodowisk obrazowych).
+- `conv_layers`: lista warstw Conv2d jako krotki `(out_channels, kernel_size, stride)`. Domyslnie `[(32, 8, 4), (64, 4, 2), (64, 3, 1)]`.
+- `cnn_hidden_dim`: rozmiar warstwy ukrytej po CNN trunk.
+- `frame_stack`: liczba klatek stackowanych jako obserwacja (domyslnie `4`).
+- `frame_size`: docelowy rozmiar klatki `[H, W]` (domyslnie `[84, 84]`).
+- `frame_skip`: liczba klatek pomijanych (action repeat, domyslnie `1`).
+- `is_atari`: flaga sterujaca wyborem wrapperow Atari vs generycznych.
+- `target_update_freq`: hard update target network co N krokow (0 = soft update z `tau`).
 
 Parametry ewaluacji:
 

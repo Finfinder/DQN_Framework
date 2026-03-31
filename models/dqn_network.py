@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from models.cnn_dqn_network import CNNDQN
+
 
 class DQN(nn.Module):
     def __init__(self, state_dim, action_dim, hidden_layers=[64, 64], dueling=False):
@@ -45,3 +47,18 @@ class DQN(nn.Module):
             # Combine value and normalized advantages
             q_values = value + advantage_normalized
             return q_values
+
+
+def create_network(config, state_shape, action_dim):
+    if config.network_type == "cnn":
+        return CNNDQN(
+            state_shape, action_dim,
+            conv_layers=config.conv_layers,
+            hidden_dim=config.cnn_hidden_dim,
+            dueling=config.use_dueling,
+        )
+    return DQN(
+        state_shape[0], action_dim,
+        hidden_layers=config.hidden_layers,
+        dueling=config.use_dueling,
+    )

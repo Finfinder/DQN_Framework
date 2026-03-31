@@ -2,12 +2,12 @@ import argparse
 import csv
 from datetime import datetime
 from pathlib import Path
-import gymnasium as gym
 import torch
 
-from models.dqn_network import DQN
+from models.dqn_network import create_network
 from config.config import Config
 from utils.evaluate import evaluate_policy
+from utils.wrappers import make_env, wrap_env
 from version import __version__
 
 
@@ -48,7 +48,8 @@ def parse_args():
 
 
 def render_episodes(model, config, num_episodes):
-    env = gym.make(config.env_name, render_mode="human")
+    env = make_env(config.env_name, render_mode="human", frame_skip=config.frame_skip)
+    env, _ = wrap_env(env, config)
     model.eval()
 
     try:
@@ -76,16 +77,12 @@ def main():
     args = parse_args()
     config = Config(env_name=args.env_name)
 
-    env = gym.make(config.env_name)
-    state_size = env.observation_space.shape[0]
+    env = make_env(config.env_name, frame_skip=config.frame_skip)
+    env, state_shape = wrap_env(env, config)
     action_size = env.action_space.n
     env.close()
 
-    model = DQN(
-        state_size, action_size,
-        hidden_layers=config.hidden_layers,
-        dueling=config.use_dueling,
-    ).to(config.device)
+    model = create_network(config, state_shape, action_size).to(config.device)
 
     model_path = Path(config.model_path)
     if not model_path.exists():
@@ -103,7 +100,7 @@ def main():
     print("-" * 60)
 
     eval_stats = evaluate_policy(
-        model, config.env_name, args.episodes, config.device, seed=config.seed,
+        model, config, args.episodes, config.device, seed=config.seed,
     )
 
     print(f"  Mean reward: {eval_stats['mean_reward']:.2f}")

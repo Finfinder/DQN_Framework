@@ -51,7 +51,7 @@ jobs:
               assert cfg.plot_path
 
           cfg = Config("CartPole-v1")
-          env = make_env(cfg.env_name)
+          env = make_env(cfg.env_name, frame_skip=cfg.frame_skip)
           env, _ = wrap_env(env, cfg)
           state, _ = env.reset(seed=cfg.seed)
           action = env.action_space.sample()

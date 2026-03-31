@@ -1,5 +1,6 @@
 import random
 import torch
+import torch.nn.functional as F
 import torch.optim as optim
 
 class DQNAgent:
@@ -11,7 +12,8 @@ class DQNAgent:
         self.memory = memory
         self.config = config
 
-        self.optimizer = optim.Adam(policy_net.parameters(), lr=config.lr)
+        self.optimizer = optim.Adam(policy_net.parameters(), lr=config.lr, eps=config.adam_eps)
+        self.train_steps = 0
 
     def select_action(self, state, epsilon, env):
         if random.random() < epsilon:
@@ -57,7 +59,7 @@ class DQNAgent:
             expected_q = rewards + self.config.gamma * next_q * (1 - dones)
 
         td_errors = expected_q - q_value
-        sample_losses = td_errors.pow(2)
+        sample_losses = F.smooth_l1_loss(q_value, expected_q, reduction='none')
 
         if self.config.use_per:
             loss = (is_weights * sample_losses).mean()
@@ -71,10 +73,15 @@ class DQNAgent:
 
         self.optimizer.step()
 
-        for target_param, param in zip(self.target_net.parameters(), self.policy_net.parameters()):
-            target_param.data.copy_(
-                self.config.tau*param.data + (1-self.config.tau)*target_param.data
-            )
+        self.train_steps += 1
+        if self.config.target_update_freq > 0:
+            if self.train_steps % self.config.target_update_freq == 0:
+                self.target_net.load_state_dict(self.policy_net.state_dict())
+        else:
+            for target_param, param in zip(self.target_net.parameters(), self.policy_net.parameters()):
+                target_param.data.copy_(
+                    self.config.tau*param.data + (1-self.config.tau)*target_param.data
+                )
 
         stats = {
             "loss": float(loss.item()),

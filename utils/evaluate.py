@@ -1,11 +1,12 @@
-import gymnasium as gym
 import numpy as np
 import torch
 
+from utils.wrappers import make_env, wrap_env
 
-def evaluate_policy(model, env_name, num_episodes, device, seed=None):
-    """Run policy greedily (epsilon=0) and return evaluation statistics."""
-    env = gym.make(env_name)
+
+def evaluate_policy(model, config, num_episodes, device, seed=None):
+    env = make_env(config.env_name, frame_skip=config.frame_skip)
+    env, _ = wrap_env(env, config)
 
     model.eval()
     rewards = []

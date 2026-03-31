@@ -7,7 +7,21 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [1.0.1] - Unreleased
 
+### Dodane
+- Architektura CNN DQN (`models/cnn_dqn_network.py`) z konfigurowalnymi warstwami Conv2d i obsługą Dueling.
+- Factory `create_network(config, state_shape, action_dim)` do automatycznego wyboru MLP lub CNN.
+- Wrappery środowiska (`utils/wrappers.py`): `make_env()` z `frame_skip`, `wrap_env()` z preprocessingiem obrazu (Atari + generyczne).
+- Preset `ALE/Pong-v5` z dedykowanymi hiperparametrami CNN.
+- Nowe parametry konfiguracji: `network_type`, `conv_layers`, `cnn_hidden_dim`, `frame_stack`, `frame_size`, `frame_skip`, `is_atari`, `target_update_freq`, `adam_eps`.
+- Wytrenowany model `dqn_pong_cnn_dueling.pth`.
+
 ### Zmienione
+- Funkcja straty zmieniona z MSE na Smooth L1 (Huber loss) w `DQNAgent.train_step()`.
+- Opcjonalny hard target update co `target_update_freq` kroków (gdy > 0) zamiast ciągłego soft update.
+- Parametr `adam_eps` dodany do optymalizatora Adam.
+- Pliki `train.py`, `evaluate.py`, `play.py` zaktualizowane do obsługi CNN i wrapperów środowiska.
+- Metryki CSV flushowane po każdym zapisie dla szybszego podglądu.
+- CI smoke test zaktualizowany dla nowego API `make_env`/`wrap_env`.
 
 ## [1.0.0] - 2026-03-14
 

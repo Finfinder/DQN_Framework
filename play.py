@@ -1,10 +1,10 @@
 import argparse
-import gymnasium as gym
 from pathlib import Path
 import torch
 
-from models.dqn_network import DQN
+from models.dqn_network import create_network
 from config.config import Config
+from utils.wrappers import make_env, wrap_env
 from version import __version__
 
 
@@ -38,12 +38,12 @@ config = Config(env_name=args.env_name)
 if args.play_episodes is not None:
     config.play_episodes = args.play_episodes
 
-env = gym.make(config.env_name, render_mode="human")
+env = make_env(config.env_name, render_mode="human", frame_skip=config.frame_skip)
 
-state_size = env.observation_space.shape[0]
+env, state_shape = wrap_env(env, config)
 action_size = env.action_space.n
 
-model = DQN(state_size, action_size, hidden_layers=config.hidden_layers, dueling=config.use_dueling).to(config.device)
+model = create_network(config, state_shape, action_size).to(config.device)
 
 model_path = Path(config.model_path)
 if not model_path.exists():

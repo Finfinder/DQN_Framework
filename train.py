@@ -1,6 +1,5 @@
 import argparse
 import csv
-import gymnasium as gym
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,10 +9,11 @@ from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 
 from config.config import Config
-from models.dqn_network import DQN
+from models.dqn_network import create_network
 from memory.replay_buffer import create_buffer
 from agents.dqn_agent import DQNAgent
 from utils.evaluate import evaluate_policy
+from utils.wrappers import make_env, wrap_env
 from version import __version__
 
 
@@ -56,15 +56,15 @@ if args.seed is not None:
 if config.seed is not None:
     set_seed(config.seed)
 
-env = gym.make(config.env_name)
+env = make_env(config.env_name, frame_skip=config.frame_skip)
 if config.seed is not None:
     env.action_space.seed(config.seed)
 
-state_size = env.observation_space.shape[0]
+env, state_shape = wrap_env(env, config)
 action_size = env.action_space.n
 
-policy_net = DQN(state_size, action_size, hidden_layers=config.hidden_layers, dueling=config.use_dueling).to(config.device)
-target_net = DQN(state_size, action_size, hidden_layers=config.hidden_layers, dueling=config.use_dueling).to(config.device)
+policy_net = create_network(config, state_shape, action_size).to(config.device)
+target_net = create_network(config, state_shape, action_size).to(config.device)
 
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
@@ -207,6 +207,7 @@ try:
             episode_td_error,
             episode_priority,
         ])
+        metrics_fp.flush()
         if episode_losses:
             writer.add_scalar("episode/loss", float(np.mean(episode_losses)), episode)
         if episode_q_means:
@@ -230,7 +231,7 @@ try:
         if episode % config.eval_every == 0:
             policy_net.eval()
             eval_stats = evaluate_policy(
-                policy_net, config.env_name, config.eval_episodes,
+                policy_net, config, config.eval_episodes,
                 config.device, seed=config.seed,
             )
             policy_net.train()
@@ -247,6 +248,7 @@ try:
                 eval_stats["min_reward"],
                 eval_stats["max_reward"],
             ])
+            eval_metrics_fp.flush()
 
             print(
                 f"  [EVAL] Episodes: {config.eval_episodes}, "
