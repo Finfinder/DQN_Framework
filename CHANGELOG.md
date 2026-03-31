@@ -8,6 +8,7 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 ## [1.0.1] - Unreleased
 
 ### Dodane
+- Plik `.github/instructions/dqn-framework.instructions.md` ze scoped konwencjami projektu (applyTo: `**`).
 - Architektura CNN DQN (`models/cnn_dqn_network.py`) z konfigurowalnymi warstwami Conv2d i obsługą Dueling.
 - Factory `create_network(config, state_shape, action_dim)` do automatycznego wyboru MLP lub CNN.
 - Wrappery środowiska (`utils/wrappers.py`): `make_env()` z `frame_skip`, `wrap_env()` z preprocessingiem obrazu (Atari + generyczne).

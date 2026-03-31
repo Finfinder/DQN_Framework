@@ -20,7 +20,7 @@ metrics/
 .github/skills/
 .github/agents/
 .github/prompts/
-.github/instructions/
+!.github/instructions/
 .github/chatmodes/
 
 # OS/editor files
