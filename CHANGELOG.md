@@ -8,6 +8,8 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 ## [1.0.1] - Unreleased
 
 ### Dodane
+- README po angielsku – pełne tłumaczenie `README.md` na język angielski z paskiem badge'ów (Python, PyTorch, Gymnasium, Version, License, CI) w stylu SeqMcpServer.
+- Licencja MIT – dodano plik `LICENSE` (MIT, 2025, Finfinder).
 - Plik `.github/instructions/dqn-framework.instructions.md` ze scoped konwencjami projektu (applyTo: `**`).
 - Architektura CNN DQN (`models/cnn_dqn_network.py`) z konfigurowalnymi warstwami Conv2d i obsługą Dueling.
 - Factory `create_network(config, state_shape, action_dim)` do automatycznego wyboru MLP lub CNN.
