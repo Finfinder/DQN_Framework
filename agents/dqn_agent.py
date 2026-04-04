@@ -69,7 +69,7 @@ class DQNAgent:
         self.optimizer.zero_grad()
         loss.backward()
 
-        torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(),1.0)
+        torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), self.config.gradient_clip)
 
         self.optimizer.step()
 

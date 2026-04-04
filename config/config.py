@@ -40,13 +40,23 @@ class Config:
         "is_atari": False,
         "target_update_freq": 0,
         "adam_eps": 1e-8,
+        "gradient_clip": 1.0,
     }
 
     ENV_CONFIG = {
         "CartPole-v1": {
-            "hidden_layers": [64, 64],
+            "hidden_layers": [128, 128],
             "num_episodes": 800,
-            "epsilon_decay": 0.985,
+            "epsilon_decay": 0.993,
+            "lr": 0.0005,
+            "tau": 0.003,
+            "batch_size": 128,
+            "memory_size": 30000,
+            "train_every_steps": 2,
+            "per_alpha": 0.6,
+            "per_beta_frames": 30000,
+            "adam_eps": 1e-4,
+            "gradient_clip": 0.3,
             "solved_threshold": 400.0,
             "model_path": "dqn_cartpole.pth",
             "plot_path": "training_curve_cartpole.png",
@@ -154,6 +164,7 @@ class Config:
         self.is_atari = merged["is_atari"]
         self.target_update_freq = merged["target_update_freq"]
         self.adam_eps = merged["adam_eps"]
+        self.gradient_clip = merged["gradient_clip"]
         
         # Generate suffix for model paths based on network_type and use_dueling
         arch = "_cnn" if self.network_type == "cnn" else ""

@@ -17,6 +17,7 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 - Preset `ALE/Pong-v5` z dedykowanymi hiperparametrami CNN.
 - Nowe parametry konfiguracji: `network_type`, `conv_layers`, `cnn_hidden_dim`, `frame_stack`, `frame_size`, `frame_skip`, `is_atari`, `target_update_freq`, `adam_eps`.
 - Wytrenowany model `dqn_pong_cnn_dueling.pth`.
+- Konfigurowalny gradient clipping (`gradient_clip`) — domyślnie 1.0, umożliwia dostrojenie per środowisko.
 
 ### Zmienione
 - Funkcja straty zmieniona z MSE na Smooth L1 (Huber loss) w `DQNAgent.train_step()`.
@@ -25,6 +26,7 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 - Pliki `train.py`, `evaluate.py`, `play.py` zaktualizowane do obsługi CNN i wrapperów środowiska.
 - Metryki CSV flushowane po każdym zapisie dla szybszego podglądu.
 - CI smoke test zaktualizowany dla nowego API `make_env`/`wrap_env`.
+- Dostrojone hiperparametry CartPole-v1: `hidden_layers=[128,128]`, `epsilon_decay=0.993`, `lr=0.0005`, `tau=0.003`, `batch_size=128`, `memory_size=30000`, `train_every_steps=2`, `per_beta_frames=30000`, `adam_eps=1e-4`, `gradient_clip=0.3`. Osiągnięto 83% success rate (10/12 seedów) przy 800 epizodach.
 
 ## [1.0.0] - 2026-03-14
 
