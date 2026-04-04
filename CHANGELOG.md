@@ -27,6 +27,7 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 - Metryki CSV flushowane po każdym zapisie dla szybszego podglądu.
 - CI smoke test zaktualizowany dla nowego API `make_env`/`wrap_env`.
 - Dostrojone hiperparametry CartPole-v1: `hidden_layers=[128,128]`, `epsilon_decay=0.993`, `lr=0.0005`, `tau=0.003`, `batch_size=128`, `memory_size=30000`, `train_every_steps=2`, `per_beta_frames=30000`, `adam_eps=1e-4`, `gradient_clip=0.3`. Osiągnięto 83% success rate (10/12 seedów) przy 800 epizodach.
+- Zwiększono `num_episodes` CartPole-v1 z 800 do 900 — seed 42 (domyślny) wymagał 827 epizodów do rozwiązania, co powodowało deterministyczne niepowodzenie przy limicie 800.
 
 ## [1.0.0] - 2026-03-14
 

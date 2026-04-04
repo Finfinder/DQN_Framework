@@ -46,7 +46,7 @@ class Config:
     ENV_CONFIG = {
         "CartPole-v1": {
             "hidden_layers": [128, 128],
-            "num_episodes": 800,
+            "num_episodes": 900,
             "epsilon_decay": 0.993,
             "lr": 0.0005,
             "tau": 0.003,
