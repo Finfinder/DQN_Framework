@@ -28,6 +28,11 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 - CI smoke test zaktualizowany dla nowego API `make_env`/`wrap_env`.
 - Dostrojone hiperparametry CartPole-v1: `hidden_layers=[128,128]`, `epsilon_decay=0.993`, `lr=0.0005`, `tau=0.003`, `batch_size=128`, `memory_size=30000`, `train_every_steps=2`, `per_beta_frames=30000`, `adam_eps=1e-4`, `gradient_clip=0.3`. Osiągnięto 83% success rate (10/12 seedów) przy 800 epizodach.
 - Zwiększono `num_episodes` CartPole-v1 z 800 do 900 — seed 42 (domyślny) wymagał 827 epizodów do rozwiązania, co powodowało deterministyczne niepowodzenie przy limicie 800.
+- Dostrojone hiperparametry MountainCar-v0: `lr=0.001`, `tau=0.001`, `epsilon_decay=0.998`, `buffer_type="replay"`, `eval_every=50`, `eval_episodes=20`. Zmiana z PER na uniform replay buffer eliminuje niestabilność TD error. Osiągnięto 67% success rate (8/12 seedów) przy 3500 epizodach.
+- Reward shaping dla MountainCar-v0: `reward + 10 * abs(velocity)` — zachęca agenta do budowania momentum.
+- Eval-based early stopping w `train.py` — zapisuje model na najlepszym wyniku ewaluacji i kończy trening gdy eval mean > solved_threshold.
+- Naprawiono blokowanie `plt.show()` — zmiana na `plt.show(block=False)` + `plt.close()` zapobiega zawieszeniu procesu po zakończeniu treningu.
+- `tuning_test.py` — parametryzacja środowiska przez `sys.argv[1]`, eval-based early stopping, reward shaping per środowisko, rozszerzenie do 12 seedów.
 
 ## [1.0.0] - 2026-03-14
 

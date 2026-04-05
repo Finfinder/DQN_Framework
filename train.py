@@ -77,6 +77,7 @@ epsilon = config.epsilon
 step_count = 0
 episode_rewards = []
 best_avg_reward = float("-inf")
+best_eval_reward = float("-inf")
 saved_best = False
 
 run_started_at = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -147,6 +148,9 @@ try:
             if config.env_name == "CartPole-v1" and terminated:
                 # Penalize failure transitions to improve value separation.
                 train_reward = -10.0
+            elif config.env_name == "MountainCar-v0":
+                # Reward velocity to encourage momentum building.
+                train_reward = reward + 10 * abs(next_state[1])
 
             memory.push(state, action, train_reward, next_state, done)
 
@@ -258,6 +262,20 @@ try:
                 f"Max: {eval_stats['max_reward']:.1f}"
             )
 
+            if eval_stats["mean_reward"] > best_eval_reward:
+                best_eval_reward = eval_stats["mean_reward"]
+                torch.save(policy_net.state_dict(), config.model_path)
+                saved_best = True
+
+            if eval_stats["mean_reward"] > config.solved_threshold:
+                torch.save(policy_net.state_dict(), config.model_path)
+                saved_best = True
+                print(
+                    f"Early stopping: Eval mean = {eval_stats['mean_reward']:.1f} > "
+                    f"{config.solved_threshold:.1f}. Saved model to {config.model_path}"
+                )
+                break
+
         if len(episode_rewards) >= 100 and avg_reward_100 > config.solved_threshold:
             torch.save(policy_net.state_dict(), config.model_path)
             saved_best = True
@@ -289,4 +307,5 @@ if window >= 2:
     plt.legend()
     plt.tight_layout()
     plt.savefig(config.plot_path, dpi=150)
-    plt.show()
+    plt.show(block=False)
+    plt.close()

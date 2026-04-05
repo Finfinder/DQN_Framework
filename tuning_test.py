@@ -1,4 +1,4 @@
-"""Tuning validation: run CartPole-v1 with 6 seeds, report success rate."""
+"""Tuning validation: run environment with multiple seeds, report success rate."""
 import sys
 import os
 import random
@@ -9,12 +9,13 @@ os.environ["MPLBACKEND"] = "Agg"
 
 from config.config import Config
 from utils.wrappers import make_env, wrap_env
+from utils.evaluate import evaluate_policy
 from models.dqn_network import create_network
 from memory.replay_buffer import create_buffer
 from agents.dqn_agent import DQNAgent
 
 SEEDS = [42, 123, 456, 789, 234, 567, 999, 1337, 2025, 777, 314, 628]
-ENV = "CartPole-v1"
+ENV = sys.argv[1] if len(sys.argv) > 1 else "CartPole-v1"
 
 
 def run_seed(seed):
@@ -53,8 +54,10 @@ def run_seed(seed):
             done = terminated or truncated
 
             train_reward = reward
-            if terminated:
+            if config.env_name == "CartPole-v1" and terminated:
                 train_reward = -10.0
+            elif config.env_name == "MountainCar-v0":
+                train_reward = reward + 10 * abs(next_state[1])
 
             memory.push(state, action, train_reward, next_state, done)
             state = next_state
@@ -80,6 +83,17 @@ def run_seed(seed):
         if len(episode_rewards) >= 100 and avg100 > config.solved_threshold:
             env.close()
             return True, episode, avg100
+
+        if episode % config.eval_every == 0:
+            policy_net.eval()
+            eval_stats = evaluate_policy(
+                policy_net, config, config.eval_episodes,
+                config.device, seed=config.seed,
+            )
+            policy_net.train()
+            if eval_stats["mean_reward"] > config.solved_threshold:
+                env.close()
+                return True, episode, eval_stats["mean_reward"]
 
     env.close()
     final_avg = float(np.mean(episode_rewards[-100:]))
