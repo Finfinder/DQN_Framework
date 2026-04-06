@@ -10,10 +10,10 @@ class ReplayBuffer:
         self.capacity = capacity
         self.memory = deque(maxlen=capacity)
 
-    def push(self, state, action, reward, next_state, done, td_error=None):
+    def push(self, state, action, reward, next_state, done, _td_error=None):
         self.memory.append((state, action, reward, next_state, done))
 
-    def sample(self, batch_size, beta=0.4):
+    def sample(self, batch_size, _beta=0.4):
         batch = random.sample(self.memory, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
         return (
@@ -25,6 +25,7 @@ class ReplayBuffer:
         )
 
     def update_priorities(self, indices, td_errors):
+        # No-op: uniform buffer does not use priorities
         pass
 
     def mean_priority(self):
@@ -46,6 +47,7 @@ class PrioritizedReplayBuffer:
         self.position = 0
         self.size = 0
         self.max_priority = 1.0
+        self.rng = np.random.default_rng()
 
     def push(self, state, action, reward, next_state, done, td_error=None):
         self.memory[self.position] = (state, action, reward, next_state, done)
@@ -70,7 +72,7 @@ class PrioritizedReplayBuffer:
         else:
             probs = scaled_priorities / prob_sum
 
-        indices = np.random.choice(self.size, batch_size, p=probs)
+        indices = self.rng.choice(self.size, batch_size, p=probs)
         batch = [self.memory[idx] for idx in indices]
 
         states, actions, rewards, next_states, dones = zip(*batch)
@@ -118,7 +120,7 @@ class NstepReplayBuffer:
         self.memory = deque(maxlen=capacity)
         self._buffer = deque(maxlen=n_step)
 
-    def push(self, state, action, reward, next_state, done, td_error=None):
+    def push(self, state, action, reward, next_state, done, _td_error=None):
         self._buffer.append((state, action, reward, next_state, done))
 
         if done:
@@ -145,7 +147,7 @@ class NstepReplayBuffer:
         self.memory.append((state, action, nstep_return, next_state, done))
         self._buffer.popleft()
 
-    def sample(self, batch_size, beta=0.4):
+    def sample(self, batch_size, _beta=0.4):
         batch = random.sample(self.memory, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
         return (
@@ -157,6 +159,7 @@ class NstepReplayBuffer:
         )
 
     def update_priorities(self, indices, td_errors):
+        # No-op: n-step buffer does not use priorities
         pass
 
     def mean_priority(self):

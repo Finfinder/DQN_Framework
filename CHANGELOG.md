@@ -8,10 +8,20 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 ## [1.0.1] - Unreleased
 
 ### Dodane
+- Testy jednostkowe (`tests/`) — 101 testów pokrywających Config, ReplayBuffer (wszystkie warianty), DQNAgent, utils/training, utils/evaluate, utils/wrappers; integracja z pytest + pytest-cov.
+- Moduł `utils/training.py` — współdzielona logika treningowa: `run_episode()`, `compute_beta()`, `shape_reward()`, `compute_avg100()` wydzielona z `train.py` i `tuning_test.py`.
+- Parametr `weight_decay` w `Config.DEFAULTS` (domyślnie `0`) i przekazywany do optymizatora Adam w `DQNAgent`.
+- Konfiguracja coverage w CI (`ci.yml`) i SonarCloud (`sonar.yml`) — generowanie `coverage.xml` przed skanem.
 - Integracja SonarCloud — workflow `.github/workflows/sonar.yml` z analizą na push/PR, pokryciem kodu pytest i konfiguracją `sonar-project.properties`.
 - Shared binding SonarQube for IDE — `.sonarlint/connectedMode.json` dla Connected Mode z SonarCloud.
 
 ### Naprawione
+- Redukcja Cognitive Complexity: `list_runs()`, `diagnose()`, `main()` w `utils/analyze.py` (przez ekstrakcję 7 prywatnych helperów); `run_seed()` w `tuning_test.py` (użycie `run_episode()` z `utils/training.py`).
+- Usunięte nieużywane zmienne w `utils/analyze.py`: `meta_train`, `meta_eval` → `_`; `final_eps` usunięte.
+- Puste metody `update_priorities()` w `ReplayBuffer` i `NstepReplayBuffer` opatrzone komentarzem `# No-op`.
+- Nieużywane parametry interfejsu w `ReplayBuffer` i `NstepReplayBuffer`: `td_error` → `_td_error`, `beta` → `_beta`.
+- Migracja `PrioritizedReplayBuffer.sample()` z `np.random.choice()` na `numpy.random.Generator` (`self.rng.choice()`).
+- Duplikacja kodu między `train.py` i `tuning_test.py` — pętla treningowa i reward shaping wydzielone do `utils/training.py`.
 - Błąd SonarCloud scan — usunięto `sonar.tests=tests` i `sonar.test.inclusions` z `sonar-project.properties` (brak katalogu `tests/` w repozytorium).
 - Zaktualizowano `sonarqube-scan-action` z v5 na v6 (v5 zawiera lukę bezpieczeństwa i jest wycofana).
 

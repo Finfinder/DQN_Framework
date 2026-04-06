@@ -96,6 +96,18 @@ python evaluate.py Acrobot-v1 --episodes 100 --render
 python evaluate.py CartPole-v1 --render --render-episodes 5
 ```
 
+6. Running unit tests:
+
+```bash
+pytest tests/ -v
+```
+
+7. Running tests with coverage report:
+
+```bash
+pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov-report=term-missing
+```
+
 ---
 
 ## How It Works

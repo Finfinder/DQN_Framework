@@ -41,6 +41,7 @@ class Config:
         "target_update_freq": 0,
         "adam_eps": 1e-8,
         "gradient_clip": 1.0,
+        "weight_decay": 0,
     }
 
     ENV_CONFIG = {
@@ -167,6 +168,7 @@ class Config:
         self.target_update_freq = merged["target_update_freq"]
         self.adam_eps = merged["adam_eps"]
         self.gradient_clip = merged["gradient_clip"]
+        self.weight_decay = merged["weight_decay"]
         
         # Generate suffix for model paths based on network_type and use_dueling
         arch = "_cnn" if self.network_type == "cnn" else ""

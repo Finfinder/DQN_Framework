@@ -24,10 +24,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install torch==2.5.1 numpy matplotlib tensorboard gymnasium
           pip install ruff==0.11.11
+          pip install pytest pytest-cov
 
       - name: Lint for critical errors
         run: |
           ruff check . --select E9,F63,F7,F82
+
+      - name: Run unit tests with coverage
+        run: |
+          pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov-report=xml:coverage.xml -q
 
       - name: Compile all Python files
         run: |

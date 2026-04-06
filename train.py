@@ -14,6 +14,7 @@ from memory.replay_buffer import create_buffer
 from agents.dqn_agent import DQNAgent
 from utils.evaluate import evaluate_policy
 from utils.wrappers import make_env, wrap_env
+from utils.training import run_episode, compute_avg100
 from version import __version__
 
 
@@ -124,69 +125,43 @@ try:
     for episode in range(1, config.num_episodes + 1):
 
         if episode == 1 and config.seed is not None:
-            state, _ = env.reset(seed=config.seed)
+            first_state, _ = env.reset(seed=config.seed)
         else:
-            state, _ = env.reset()
+            first_state = None
 
-        done = False
-        total_reward = 0.0
+        result = run_episode(env, agent, memory, config, epsilon, step_count, initial_state=first_state)
+
+        total_reward = result["total_reward"]
+        step_count = result["step_count"]
+        train_stats_list = result["train_stats_list"]
+
         episode_losses = []
         episode_q_means = []
         episode_is_weight_means = []
         episode_td_error_means = []
         episode_betas = []
 
-        while not done:
+        for ts in train_stats_list:
+            sc = ts["step"]
+            episode_losses.append(ts["loss"])
+            episode_q_means.append(ts["q_mean"])
+            writer.add_scalar("train/loss", ts["loss"], sc)
+            writer.add_scalar("train/q_mean", ts["q_mean"], sc)
+            writer.add_scalar("train/q_max_mean", ts["q_max_mean"], sc)
+            writer.add_scalar("train/target_q_mean", ts["target_q_mean"], sc)
+            writer.add_scalar("train/td_error_mean", ts["td_error_mean"], sc)
 
-            action = agent.select_action(state, epsilon, env)
+            if config.use_per and "indices" in ts:
+                priority_mean = memory.mean_priority()
+                is_weight_mean = float(ts.get("is_weight_mean", 0.0))
 
-            next_state, reward, terminated, truncated, _ = env.step(action)
+                episode_betas.append(ts["beta"])
+                episode_is_weight_means.append(is_weight_mean)
+                episode_td_error_means.append(ts["td_error_mean"])
 
-            done = terminated or truncated
-
-            train_reward = reward
-            if config.env_name == "CartPole-v1" and terminated:
-                # Penalize failure transitions to improve value separation.
-                train_reward = -10.0
-            elif config.env_name == "MountainCar-v0":
-                # Reward velocity to encourage momentum building.
-                train_reward = reward + 10 * abs(next_state[1])
-
-            memory.push(state, action, train_reward, next_state, done)
-
-            state = next_state
-            total_reward += float(reward)
-            step_count += 1
-
-            if len(memory) >= config.min_replay_size and step_count % config.train_every_steps == 0:
-                beta = 1.0
-                if config.use_per:
-                    progress = min(1.0, step_count / max(1, config.per_beta_frames))
-                    beta = config.per_beta_start + progress * (1.0 - config.per_beta_start)
-
-                train_stats = agent.train_step(beta=beta)
-                if train_stats is not None:
-                    episode_losses.append(train_stats["loss"])
-                    episode_q_means.append(train_stats["q_mean"])
-                    writer.add_scalar("train/loss", train_stats["loss"], step_count)
-                    writer.add_scalar("train/q_mean", train_stats["q_mean"], step_count)
-                    writer.add_scalar("train/q_max_mean", train_stats["q_max_mean"], step_count)
-                    writer.add_scalar("train/target_q_mean", train_stats["target_q_mean"], step_count)
-                    writer.add_scalar("train/td_error_mean", train_stats["td_error_mean"], step_count)
-
-                    if config.use_per and "indices" in train_stats:
-                        memory.update_priorities(train_stats["indices"], train_stats["td_errors"])
-
-                        priority_mean = memory.mean_priority()
-                        is_weight_mean = float(train_stats.get("is_weight_mean", 0.0))
-
-                        episode_betas.append(beta)
-                        episode_is_weight_means.append(is_weight_mean)
-                        episode_td_error_means.append(train_stats["td_error_mean"])
-
-                        writer.add_scalar("train/beta", beta, step_count)
-                        writer.add_scalar("train/is_weight_mean", is_weight_mean, step_count)
-                        writer.add_scalar("train/priority_mean", priority_mean, step_count)
+                writer.add_scalar("train/beta", ts["beta"], sc)
+                writer.add_scalar("train/is_weight_mean", is_weight_mean, sc)
+                writer.add_scalar("train/priority_mean", priority_mean, sc)
 
         epsilon = max(config.epsilon_min, epsilon * config.epsilon_decay)
 

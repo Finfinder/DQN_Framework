@@ -10,12 +10,24 @@ os.environ["MPLBACKEND"] = "Agg"
 from config.config import Config
 from utils.wrappers import make_env, wrap_env
 from utils.evaluate import evaluate_policy
+from utils.training import run_episode, compute_avg100
 from models.dqn_network import create_network
 from memory.replay_buffer import create_buffer
 from agents.dqn_agent import DQNAgent
 
 SEEDS = [42, 123, 456, 789, 234, 567, 999, 1337, 2025, 777, 314, 628]
 ENV = sys.argv[1] if len(sys.argv) > 1 else "CartPole-v1"
+
+
+def _check_solved_by_eval(policy_net, config):
+    """Run evaluation and return mean_reward, or None if below threshold."""
+    policy_net.eval()
+    eval_stats = evaluate_policy(
+        policy_net, config, config.eval_episodes,
+        config.device, seed=config.seed,
+    )
+    policy_net.train()
+    return eval_stats["mean_reward"]
 
 
 def run_seed(seed):
@@ -44,38 +56,17 @@ def run_seed(seed):
     episode_rewards = []
 
     for episode in range(1, config.num_episodes + 1):
-        state, _ = env.reset(seed=seed) if episode == 1 else env.reset()
-        done = False
-        total_reward = 0.0
+        # First episode uses seeded reset; subsequent episodes use random reset
+        if episode == 1:
+            state, _ = env.reset(seed=seed)
+            result = run_episode(env, agent, memory, config, epsilon, step_count, initial_state=state)
+        else:
+            result = run_episode(env, agent, memory, config, epsilon, step_count)
 
-        while not done:
-            action = agent.select_action(state, epsilon, env)
-            next_state, reward, terminated, truncated, _ = env.step(action)
-            done = terminated or truncated
-
-            train_reward = reward
-            if config.env_name == "CartPole-v1" and terminated:
-                train_reward = -10.0
-            elif config.env_name == "MountainCar-v0":
-                train_reward = reward + 10 * abs(next_state[1])
-
-            memory.push(state, action, train_reward, next_state, done)
-            state = next_state
-            total_reward += float(reward)
-            step_count += 1
-
-            if len(memory) >= config.min_replay_size and step_count % config.train_every_steps == 0:
-                beta = 1.0
-                if config.use_per:
-                    progress = min(1.0, step_count / max(1, config.per_beta_frames))
-                    beta = config.per_beta_start + progress * (1.0 - config.per_beta_start)
-                train_stats = agent.train_step(beta=beta)
-                if train_stats is not None and config.use_per and "indices" in train_stats:
-                    memory.update_priorities(train_stats["indices"], train_stats["td_errors"])
-
+        step_count = result["step_count"]
         epsilon = max(config.epsilon_min, epsilon * config.epsilon_decay)
-        episode_rewards.append(total_reward)
-        avg100 = float(np.mean(episode_rewards[-100:]))
+        episode_rewards.append(result["total_reward"])
+        avg100 = compute_avg100(episode_rewards)
 
         if episode % 100 == 0:
             print(f"  Ep {episode}, Avg100: {avg100:.1f}, Eps: {epsilon:.4f}", flush=True)
@@ -85,19 +76,13 @@ def run_seed(seed):
             return True, episode, avg100
 
         if episode % config.eval_every == 0:
-            policy_net.eval()
-            eval_stats = evaluate_policy(
-                policy_net, config, config.eval_episodes,
-                config.device, seed=config.seed,
-            )
-            policy_net.train()
-            if eval_stats["mean_reward"] > config.solved_threshold:
+            eval_mean = _check_solved_by_eval(policy_net, config)
+            if eval_mean > config.solved_threshold:
                 env.close()
-                return True, episode, eval_stats["mean_reward"]
+                return True, episode, eval_mean
 
     env.close()
-    final_avg = float(np.mean(episode_rewards[-100:]))
-    return False, config.num_episodes, final_avg
+    return False, config.num_episodes, compute_avg100(episode_rewards)
 
 
 if __name__ == "__main__":

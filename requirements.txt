@@ -20,5 +20,9 @@ tensorboard==2.20.0
 # Data Analysis (utils/analyze.py, analysis.ipynb)
 pandas
 
+# Testing
+pytest
+pytest-cov
+
 # Torch install index (required for CUDA builds)
 # --extra-index-url https://download.pytorch.org/whl/cu121

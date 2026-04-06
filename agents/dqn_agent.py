@@ -12,7 +12,7 @@ class DQNAgent:
         self.memory = memory
         self.config = config
 
-        self.optimizer = optim.Adam(policy_net.parameters(), lr=config.lr, eps=config.adam_eps)
+        self.optimizer = optim.Adam(policy_net.parameters(), lr=config.lr, eps=config.adam_eps, weight_decay=config.weight_decay)
         self.train_steps = 0
 
     def select_action(self, state, epsilon, env):

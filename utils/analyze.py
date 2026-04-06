@@ -10,6 +10,38 @@ import pandas as pd
 METRICS_DIR = Path(__file__).resolve().parent.parent / "metrics"
 
 
+def _parse_run_filename(stem, is_eval):
+    """Parse a CSV file stem into (env, model, timestamp, run_type) or None."""
+    name = stem
+    if is_eval:
+        name = name[: -len("_eval")]
+
+    # Timestamp is last 15 chars: YYYYMMDD-HHMMSS
+    timestamp_str = name[-15:]
+    rest = name[: -(15 + 1)]  # strip _timestamp
+
+    # env is up to the first underscore that starts model name (dqn_)
+    idx = rest.find("_dqn_")
+    if idx == -1:
+        return None
+
+    env = rest[:idx]
+    model = rest[idx + 1:]
+
+    try:
+        ts = datetime.strptime(timestamp_str, "%Y%m%d-%H%M%S")
+    except ValueError:
+        return None
+
+    if "_standalone_eval" in model:
+        model = model.replace("_standalone_eval", "")
+        run_type = "standalone_eval"
+    else:
+        run_type = "eval" if is_eval else "train"
+
+    return env, model, ts, run_type
+
+
 def list_runs(env_name=None, eval_only=False, train_only=False):
     """Zwraca DataFrame z listą dostępnych runów.
 
@@ -17,43 +49,22 @@ def list_runs(env_name=None, eval_only=False, train_only=False):
     """
     rows = []
     for f in sorted(METRICS_DIR.glob("*.csv")):
-        name = f.stem
-        is_eval = name.endswith("_eval")
+        stem = f.stem
+        is_eval = stem.endswith("_eval")
 
         if eval_only and not is_eval:
             continue
         if train_only and is_eval:
             continue
 
-        # Parse: <env>_<model>_<timestamp>[_eval]
-        if is_eval:
-            name = name[: -len("_eval")]
-
-        # Timestamp is last 15 chars: YYYYMMDD-HHMMSS
-        timestamp_str = name[-15:]
-        rest = name[: -(15 + 1)]  # strip _timestamp
-
-        # env is up to the first underscore that starts model name (dqn_)
-        idx = rest.find("_dqn_")
-        if idx == -1:
+        parsed = _parse_run_filename(stem, is_eval)
+        if parsed is None:
             continue
-        env = rest[:idx]
-        model = rest[idx + 1 :]
 
-        try:
-            ts = datetime.strptime(timestamp_str, "%Y%m%d-%H%M%S")
-        except ValueError:
-            continue
+        env, model, ts, run_type = parsed
 
         if env_name and env != env_name:
             continue
-
-        # Detect standalone eval files from evaluate.py
-        if "_standalone_eval" in model:
-            model = model.replace("_standalone_eval", "")
-            run_type = "standalone_eval"
-        else:
-            run_type = "eval" if is_eval else "train"
 
         rows.append({
             "file": f.name,
@@ -162,16 +173,9 @@ def run_summary(env_name):
         print("Brak danych.\n")
 
 
-def diagnose(env_name):
-    """Automatyczna diagnoza ostatniego runu — zwraca listę obserwacji."""
-    df_train, meta_train = load_latest(env_name, "train")
-    if df_train is None:
-        return ["Brak danych treningowych dla tego środowiska."]
-
-    observations = []
+def _diagnose_trend(df_train, observations):
+    """Diagnose learning trend from avg100 column."""
     n = len(df_train)
-
-    # 1. Trend avg100
     early = df_train["avg100"].iloc[: n // 10].mean() if n >= 10 else df_train["avg100"].iloc[0]
     mid = df_train["avg100"].iloc[n // 3 : 2 * n // 3].mean()
     late = df_train["avg100"].iloc[-n // 10 :].mean() if n >= 10 else df_train["avg100"].iloc[-1]
@@ -188,46 +192,71 @@ def diagnose(env_name):
     elif improve_second > 0.1:
         observations.append("DOBRY TREND: avg100 rośnie stabilnie")
 
-    # 2. Epsilon
-    final_eps = df_train["epsilon"].iloc[-1]
+
+def _diagnose_epsilon(df_train, observations):
+    """Diagnose epsilon decay speed."""
+    n = len(df_train)
     mid_eps = df_train["epsilon"].iloc[n // 2]
     if mid_eps < 0.1:
         observations.append(f"SZYBKI SPADEK EPSILON: epsilon={mid_eps:.3f} w połowie treningu — rozważ ↑epsilon_decay")
 
-    # 3. TD error trend
-    if "td_error_mean" in df_train.columns:
-        td_early = df_train["td_error_mean"].iloc[n // 10 : n // 5].mean()
-        td_late = df_train["td_error_mean"].iloc[-n // 10 :].mean()
-        if td_early > 0 and td_late > td_early * 1.5:
-            observations.append("ROSNĄCY TD ERROR: model traci stabilność — rozważ ↓lr, ↓tau")
-        elif td_early > 0 and td_late < td_early * 0.5:
-            observations.append("SPADAJĄCY TD ERROR: dobre predykcje wartości ✓")
 
-    # 4. Eval vs training
-    df_eval, meta_eval = load_latest(env_name, "eval")
+def _diagnose_td_error(df_train, observations):
+    """Diagnose TD error trend if available."""
+    if "td_error_mean" not in df_train.columns:
+        return
+    n = len(df_train)
+    td_early = df_train["td_error_mean"].iloc[n // 10 : n // 5].mean()
+    td_late = df_train["td_error_mean"].iloc[-n // 10 :].mean()
+    if td_early > 0 and td_late > td_early * 1.5:
+        observations.append("ROSNĄCY TD ERROR: model traci stabilność — rozważ ↓lr, ↓tau")
+    elif td_early > 0 and td_late < td_early * 0.5:
+        observations.append("SPADAJĄCY TD ERROR: dobre predykcje wartości ✓")
+
+
+def _diagnose_eval_vs_train(df_train, env_name, observations):
+    """Diagnose gap between eval and train performance."""
+    df_eval, _ = load_latest(env_name, "eval")
     if df_eval is None:
-        df_eval, meta_eval = load_latest(env_name, "standalone_eval")
-    if df_eval is not None and not df_eval.empty:
-        eval_mean = df_eval["mean_reward"].iloc[-1]
-        train_avg = df_train["avg100"].iloc[-1]
-        gap = train_avg - eval_mean
-        if gap > 0 and gap / max(abs(train_avg), 1) > 0.3:
+        df_eval, _ = load_latest(env_name, "standalone_eval")
+    if df_eval is None or df_eval.empty:
+        return
+
+    eval_mean = df_eval["mean_reward"].iloc[-1]
+    train_avg = df_train["avg100"].iloc[-1]
+    gap = train_avg - eval_mean
+
+    if gap > 0 and gap / max(abs(train_avg), 1) > 0.3:
+        observations.append(
+            f"EVAL << TRAIN: eval={eval_mean:.1f} vs avg100={train_avg:.1f} "
+            "— policy misalignment, rozważ ↓epsilon_min, ↓tau"
+        )
+    elif eval_mean - train_avg > 0 and (eval_mean - train_avg) / max(abs(train_avg), 1) > 0.1:
+        observations.append(
+            f"EVAL > TRAIN: eval={eval_mean:.1f} vs avg100={train_avg:.1f} "
+            "— greedy policy lepsza niż epsilon-greedy ✓"
+        )
+
+    if "std_reward" in df_eval.columns:
+        std = df_eval["std_reward"].iloc[-1]
+        if abs(eval_mean) > 0 and std / abs(eval_mean) > 0.2:
             observations.append(
-                f"EVAL << TRAIN: eval={eval_mean:.1f} vs avg100={train_avg:.1f} "
-                "— policy misalignment, rozważ ↓epsilon_min, ↓tau"
+                f"WYSOKI STD: eval std={std:.1f} ({std/abs(eval_mean)*100:.0f}% mean) "
+                "— niestabilna policy, rozważ ↑batch_size, ↓tau"
             )
-        elif eval_mean - train_avg > 0 and (eval_mean - train_avg) / max(abs(train_avg), 1) > 0.1:
-            observations.append(
-                f"EVAL > TRAIN: eval={eval_mean:.1f} vs avg100={train_avg:.1f} "
-                "— greedy policy lepsza niż epsilon-greedy ✓"
-            )
-        if "std_reward" in df_eval.columns:
-            std = df_eval["std_reward"].iloc[-1]
-            if abs(eval_mean) > 0 and std / abs(eval_mean) > 0.2:
-                observations.append(
-                    f"WYSOKI STD: eval std={std:.1f} ({std/abs(eval_mean)*100:.0f}% mean) "
-                    "— niestabilna policy, rozważ ↑batch_size, ↓tau"
-                )
+
+
+def diagnose(env_name):
+    """Automatyczna diagnoza ostatniego runu — zwraca listę obserwacji."""
+    df_train, _ = load_latest(env_name, "train")
+    if df_train is None:
+        return ["Brak danych treningowych dla tego środowiska."]
+
+    observations = []
+    _diagnose_trend(df_train, observations)
+    _diagnose_epsilon(df_train, observations)
+    _diagnose_td_error(df_train, observations)
+    _diagnose_eval_vs_train(df_train, env_name, observations)
 
     if not observations:
         observations.append("Brak wyraźnych problemów — sprawdź czy cel został osiągnięty.")
@@ -308,26 +337,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    args = parse_args()
-    runs = list_runs()
+def _print_env_list(runs):
+    """Print available environments from runs DataFrame."""
+    envs = sorted(runs["env"].unique()) if not runs.empty else []
+    if envs:
+        print("Dostępne środowiska:")
+        for env in envs:
+            print(f"- {env}")
+    else:
+        print("Brak danych w metrics/.")
 
-    if args.list_envs:
-        envs = sorted(runs["env"].unique()) if not runs.empty else []
-        if envs:
-            print("Dostępne środowiska:")
-            for env in envs:
-                print(f"- {env}")
-        else:
-            print("Brak danych w metrics/.")
-        return
 
-    if not args.env_name:
-        raise SystemExit("Podaj env_name albo użyj --list-envs.")
-
-    print(f"=== {args.env_name} ===\n")
-
-    train_cmp = compare_runs(args.env_name, "train", last_n=args.last_n)
+def _print_train_eval_results(env_name, last_n):
+    """Print training and eval run summaries and diagnosis for an environment."""
+    train_cmp = compare_runs(env_name, "train", last_n=last_n)
     if not train_cmp.empty:
         print("TRAINING RUNS:")
         print(train_cmp.to_string(index=False))
@@ -335,7 +358,7 @@ def main():
     else:
         print("Brak runów treningowych.\n")
 
-    eval_cmp = compare_runs(args.env_name, "eval", last_n=args.last_n)
+    eval_cmp = compare_runs(env_name, "eval", last_n=last_n)
     if not eval_cmp.empty:
         print("EVAL RUNS:")
         print(eval_cmp.to_string(index=False))
@@ -344,8 +367,23 @@ def main():
         print("Brak runów ewaluacyjnych.\n")
 
     print("DIAGNOZA:")
-    for observation in diagnose(args.env_name):
+    for observation in diagnose(env_name):
         print(f"- {observation}")
+
+
+def main():
+    args = parse_args()
+    runs = list_runs()
+
+    if args.list_envs:
+        _print_env_list(runs)
+        return
+
+    if not args.env_name:
+        raise SystemExit("Podaj env_name albo użyj --list-envs.")
+
+    print(f"=== {args.env_name} ===\n")
+    _print_train_eval_results(args.env_name, args.last_n)
 
     if args.export:
         summary, output_path = export_summary_report(args.env_name, args.output)
