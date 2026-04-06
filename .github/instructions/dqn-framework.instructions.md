@@ -35,8 +35,29 @@ utils/analyze.py                  — narzędzia do analizy metryk CSV
 version.py                        — jedyne źródło prawdy o wersji (__version__)
 ```
 
-- Środowisko wirtualne `.venv` WYMAGANE — wszystkie komendy po aktywacji
 - Artefakty `*.pth` i `*.png` wersjonowane w git; `logs/` i `metrics/` w `.gitignore`
+
+## Środowisko wirtualne (KRYTYCZNE)
+
+**KAŻDA komenda Pythona MUSI być uruchamiana w aktywowanym środowisku `.venv`.** Dotyczy to treningu, ewaluacji, play, testów, pip, tensorboard i wszelkich skryptów pomocniczych.
+
+Powód: Systemowy Python nie ma zainstalowanego PyTorch z obsługą CUDA. Tylko `.venv` zawiera `torch` skompilowany z CUDA — bez aktywacji venv trening wykonuje się na CPU zamiast GPU, co jest wielokrotnie wolniejsze i powoduje timeout długich treningów.
+
+Przed KAŻDYM uruchomieniem komendy w terminalu:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Weryfikacja poprawności (po aktywacji):
+
+```powershell
+python -c "import torch; print(torch.cuda.is_available())"  # Musi zwrócić True
+```
+
+- NIE uruchamiaj `python`, `pip`, `tensorboard` ani żadnych skryptów na interpreterze systemowym
+- Jeśli otwierasz nowy terminal — ZAWSZE aktywuj venv jako pierwszy krok
+- W skryptach automatycznych (np. `tuning_test.py`) upewnij się, że terminal ma aktywne venv PRZED uruchomieniem
 
 ## Wzorzec sieci neuronowej
 
@@ -108,7 +129,7 @@ Trzy warianty: `"replay"` (uniform), `"prioritized"` (PER), `"nstep"` (N-step re
 ## Komendy
 
 ```bash
-# Aktywacja środowiska (wymagane)
+# ZAWSZE najpierw aktywuj venv (wymagane dla CUDA/GPU)
 .\.venv\Scripts\Activate.ps1
 
 # Trening

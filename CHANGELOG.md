@@ -8,6 +8,15 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 ## [1.0.1] - Unreleased
 
 ### Dodane
+- Integracja SonarCloud — workflow `.github/workflows/sonar.yml` z analizą na push/PR, pokryciem kodu pytest i konfiguracją `sonar-project.properties`.
+- Shared binding SonarQube for IDE — `.sonarlint/connectedMode.json` dla Connected Mode z SonarCloud.
+
+### Usunięte
+- Plik `.github/copilot-instructions.md` — zastąpiony przez scoped instructions w `.github/instructions/dqn-framework.instructions.md`.
+
+### Zmienione
+- Sekcja „Środowisko wirtualne" w `.github/instructions/dqn-framework.instructions.md` rozszerzona o wymuszenie aktywacji venv (KRYTYCZNE dla CUDA/GPU).
+
 - README po angielsku – pełne tłumaczenie `README.md` na język angielski z paskiem badge'ów (Python, PyTorch, Gymnasium, Version, License, CI) w stylu SeqMcpServer.
 - Licencja MIT – dodano plik `LICENSE` (MIT, 2025, Finfinder).
 - Plik `.github/instructions/dqn-framework.instructions.md` ze scoped konwencjami projektu (applyTo: `**`).
