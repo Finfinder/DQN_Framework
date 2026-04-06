@@ -9,8 +9,8 @@ class TestComputeBeta:
 
     def test_returns_one_when_not_using_per(self, small_config):
         small_config.use_per = False
-        assert compute_beta(small_config, 0) == 1.0
-        assert compute_beta(small_config, 100000) == 1.0
+        assert compute_beta(small_config, 0) == pytest.approx(1.0)
+        assert compute_beta(small_config, 100000) == pytest.approx(1.0)
 
     def test_returns_per_beta_start_at_step_zero(self, per_config):
         per_config.per_beta_start = 0.4
@@ -42,11 +42,11 @@ class TestShapeReward:
 
     def test_cartpole_terminal_penalized(self):
         result = shape_reward("CartPole-v1", 1.0, np.zeros(4), terminated=True)
-        assert result == -10.0
+        assert result == pytest.approx(-10.0)
 
     def test_cartpole_non_terminal_unchanged(self):
         result = shape_reward("CartPole-v1", 1.0, np.zeros(4), terminated=False)
-        assert result == 1.0
+        assert result == pytest.approx(1.0)
 
     def test_mountaincar_adds_velocity_bonus(self):
         next_state = np.array([0.0, 0.05], dtype=np.float32)
@@ -56,11 +56,11 @@ class TestShapeReward:
 
     def test_other_env_passthrough(self):
         result = shape_reward("Acrobot-v1", -1.0, np.zeros(6), terminated=False)
-        assert result == -1.0
+        assert result == pytest.approx(-1.0)
 
     def test_other_env_terminal_passthrough(self):
         result = shape_reward("Acrobot-v1", 0.0, np.zeros(6), terminated=True)
-        assert result == 0.0
+        assert result == pytest.approx(0.0)
 
 
 class TestComputeAvg100:

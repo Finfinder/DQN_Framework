@@ -20,7 +20,7 @@ class TestParseRunFilename:
         stem = "CartPole-v1_dqn_cartpole_dueling_20250101-120000_eval"
         result = _parse_run_filename(stem, is_eval=True)
         assert result is not None
-        env, model, ts, run_type = result
+        env, _model, _ts, run_type = result
         assert env == "CartPole-v1"
         assert run_type == "eval"
 
@@ -46,7 +46,7 @@ class TestParseRunFilename:
         stem = "MountainCar-v0_dqn_mountaincar_dueling_20250606-100000"
         result = _parse_run_filename(stem, is_eval=False)
         assert result is not None
-        env, model, ts, run_type = result
+        env, _model, _ts, _run_type = result
         assert env == "MountainCar-v0"
 
     def test_timestamp_parsed_correctly(self):

@@ -8,19 +8,19 @@ class TestConfigCreation:
     def test_cartpole_default(self):
         cfg = Config("CartPole-v1")
         assert cfg.env_name == "CartPole-v1"
-        assert cfg.solved_threshold == 400.0
+        assert cfg.solved_threshold == pytest.approx(400.0)
         assert cfg.num_episodes == 900
 
     def test_mountaincar(self):
         cfg = Config("MountainCar-v0")
         assert cfg.env_name == "MountainCar-v0"
-        assert cfg.solved_threshold == -100.0
+        assert cfg.solved_threshold == pytest.approx(-100.0)
         assert cfg.buffer_type == "replay"
 
     def test_acrobot(self):
         cfg = Config("Acrobot-v1")
         assert cfg.env_name == "Acrobot-v1"
-        assert cfg.solved_threshold == -80.0
+        assert cfg.solved_threshold == pytest.approx(-80.0)
 
     def test_pong(self):
         cfg = Config("ALE/Pong-v5")
@@ -47,12 +47,12 @@ class TestConfigDefaults:
     def test_defaults_merged_into_env(self):
         cfg = Config("CartPole-v1")
         # gamma is from DEFAULTS (not overridden by CartPole ENV_CONFIG)
-        assert cfg.gamma == 0.99
+        assert cfg.gamma == pytest.approx(0.99)
 
     def test_env_config_overrides_defaults(self):
         cfg = Config("CartPole-v1")
         # lr is overridden in CartPole ENV_CONFIG from default 0.001 → 0.0005
-        assert cfg.lr == 0.0005
+        assert cfg.lr == pytest.approx(0.0005)
 
     def test_use_per_true_for_prioritized(self):
         cfg = Config("CartPole-v1")

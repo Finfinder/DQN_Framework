@@ -16,6 +16,10 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 - Shared binding SonarQube for IDE — `.sonarlint/connectedMode.json` dla Connected Mode z SonarCloud.
 
 ### Naprawione
+- Konfiguracja SonarCloud: dodano `sonar.tests=tests`, `sonar.test.inclusions`, `sonar.coverage.exclusions` — pliki testowe i CLI entry-pointy poprawnie rozgraniczone od source'ów.
+- 11× S1244 (BUG): porównania float z `==` zamienione na `pytest.approx()` w `test_config.py` i `test_training.py`.
+- S6709 (CODE SMELL): `PrioritizedReplayBuffer` — dodano parametr `seed=None` do `np.random.default_rng()`.
+- 5× S1481 (CODE SMELL): nieużywane zmienne w `test_analyze.py` zamienione na `_prefix`.
 - Redukcja Cognitive Complexity: `list_runs()`, `diagnose()`, `main()` w `utils/analyze.py` (przez ekstrakcję 7 prywatnych helperów); `run_seed()` w `tuning_test.py` (użycie `run_episode()` z `utils/training.py`).
 - Usunięte nieużywane zmienne w `utils/analyze.py`: `meta_train`, `meta_eval` → `_`; `final_eps` usunięte.
 - Puste metody `update_priorities()` w `ReplayBuffer` i `NstepReplayBuffer` opatrzone komentarzem `# No-op`.

@@ -38,7 +38,7 @@ class ReplayBuffer:
 class PrioritizedReplayBuffer:
     """Prioritized Experience Replay (PER) buffer with importance-sampling weights."""
 
-    def __init__(self, capacity, alpha=0.6, eps=1e-6):
+    def __init__(self, capacity, alpha=0.6, eps=1e-6, seed=None):
         self.capacity = capacity
         self.alpha = alpha
         self.eps = eps
@@ -47,7 +47,7 @@ class PrioritizedReplayBuffer:
         self.position = 0
         self.size = 0
         self.max_priority = 1.0
-        self.rng = np.random.default_rng()
+        self.rng = np.random.default_rng(seed)
 
     def push(self, state, action, reward, next_state, done, td_error=None):
         self.memory[self.position] = (state, action, reward, next_state, done)
