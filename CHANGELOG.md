@@ -11,6 +11,10 @@ projekt stosuje [Semantic Versioning](https://semver.org/lang/pl/).
 - Integracja SonarCloud — workflow `.github/workflows/sonar.yml` z analizą na push/PR, pokryciem kodu pytest i konfiguracją `sonar-project.properties`.
 - Shared binding SonarQube for IDE — `.sonarlint/connectedMode.json` dla Connected Mode z SonarCloud.
 
+### Naprawione
+- Błąd SonarCloud scan — usunięto `sonar.tests=tests` i `sonar.test.inclusions` z `sonar-project.properties` (brak katalogu `tests/` w repozytorium).
+- Zaktualizowano `sonarqube-scan-action` z v5 na v6 (v5 zawiera lukę bezpieczeństwa i jest wycofana).
+
 ### Usunięte
 - Plik `.github/copilot-instructions.md` — zastąpiony przez scoped instructions w `.github/instructions/dqn-framework.instructions.md`.
 
