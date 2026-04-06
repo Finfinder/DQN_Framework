@@ -6,6 +6,7 @@
 [![Version](https://img.shields.io/badge/version-1.0.1-green)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/Finfinder/DQN_Framework/ci.yml?label=CI&logo=github)](https://github.com/Finfinder/DQN_Framework/actions)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Finfinder_DQN_Framework&metric=alert_status)](https://sonarcloud.io/summary/overall?id=Finfinder_DQN_Framework)
 
 A lightweight framework for training **Deep Q-Network (DQN)** agents in discrete action space environments using Gymnasium.
 
