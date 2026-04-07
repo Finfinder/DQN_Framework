@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- `memory/replay_buffer.py`: introduced `BaseReplayBuffer(ABC)` abstract base class with `@abstractmethod push()` and default implementations of `sample()`, `update_priorities()`, `mean_priority()`, and `__len__()`. All three concrete buffer classes (`ReplayBuffer`, `PrioritizedReplayBuffer`, `NstepReplayBuffer`) now inherit from `BaseReplayBuffer`, eliminating ~16 lines of duplicated code between `ReplayBuffer` and `NstepReplayBuffer`. No breaking changes to public API.
+
 ### Added
+- `tests/test_replay_buffer.py`: `TestBaseReplayBuffer` class — 5 new tests verifying ABC enforcement (`TypeError` on direct instantiation), concrete subclass instantiation, and `isinstance` checks for all three buffer types. Extended `TestCreateBufferFactory` with `test_factory_returns_base_instance` asserting `isinstance(buf, BaseReplayBuffer)`.
 - `tests/conftest.py`: session-scoped autouse fixture `validate_environment` that emits `warnings.warn` when `.venv` is not active or CUDA is unavailable (silent in CI).
 - `tests/conftest.py`: `pytest_sessionstart` banner displaying Python version, PyTorch version, CUDA availability, CUDA device name, venv status, and CI detection at the start of every test session.
 - `tests/conftest.py`: marker `@pytest.mark.requires_cuda` with automatic skip via `pytest_collection_modifyitems` when CUDA is not available; registered programmatically and in `pyproject.toml`.

@@ -2,6 +2,7 @@
 import numpy as np
 import pytest
 from memory.replay_buffer import (
+    BaseReplayBuffer,
     ReplayBuffer,
     PrioritizedReplayBuffer,
     NstepReplayBuffer,
@@ -173,9 +174,9 @@ class TestNstepReplayBuffer:
         for _ in range(5):
             for i in range(4):
                 buf.push(state, 0, 1.0, state, i == 3)
-        if len(buf) >= 4:
-            result = buf.sample(4)
-            assert len(result) == 5
+        assert len(buf) >= 4, f"Bufor zbyt mały po wypełnieniu: {len(buf)}"
+        result = buf.sample(4)
+        assert len(result) == 5
 
 
 class TestCreateBufferFactory:
@@ -205,3 +206,33 @@ class TestCreateBufferFactory:
         per_config.per_alpha = 0.7
         buf = create_buffer(per_config)
         assert buf.alpha == pytest.approx(0.7)
+
+    def test_factory_returns_base_instance(self, small_config):
+        small_config.buffer_type = "replay"
+        buf = create_buffer(small_config)
+        assert isinstance(buf, BaseReplayBuffer)
+
+
+class TestBaseReplayBuffer:
+
+    def test_cannot_instantiate_directly(self):
+        with pytest.raises(TypeError):
+            BaseReplayBuffer(100)
+
+    def test_concrete_subclass_instantiable(self):
+        class MinimalBuffer(BaseReplayBuffer):
+            def push(self, state, action, reward, next_state, done, _td_error=None):
+                # Minimal stub — only implements abstract method for instantiation test
+                pass
+
+        buf = MinimalBuffer(10)
+        assert buf.capacity == 10
+
+    def test_isinstance_replay_buffer(self):
+        assert isinstance(ReplayBuffer(10), BaseReplayBuffer)
+
+    def test_isinstance_prioritized(self):
+        assert isinstance(PrioritizedReplayBuffer(10), BaseReplayBuffer)
+
+    def test_isinstance_nstep(self):
+        assert isinstance(NstepReplayBuffer(10), BaseReplayBuffer)

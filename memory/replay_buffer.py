@@ -1,17 +1,18 @@
 import random
-import numpy as np
+from abc import ABC, abstractmethod
 from collections import deque
 
+import numpy as np
 
-class ReplayBuffer:
-    """Uniform experience replay buffer."""
+
+class BaseReplayBuffer(ABC):
 
     def __init__(self, capacity):
         self.capacity = capacity
-        self.memory = deque(maxlen=capacity)
 
+    @abstractmethod
     def push(self, state, action, reward, next_state, done, _td_error=None):
-        self.memory.append((state, action, reward, next_state, done))
+        pass
 
     def sample(self, batch_size, _beta=0.4):
         batch = random.sample(self.memory, batch_size)
@@ -25,7 +26,7 @@ class ReplayBuffer:
         )
 
     def update_priorities(self, indices, td_errors):
-        # No-op: uniform buffer does not use priorities
+        # No-op: uniform buffers do not use priorities
         pass
 
     def mean_priority(self):
@@ -35,11 +36,22 @@ class ReplayBuffer:
         return len(self.memory)
 
 
-class PrioritizedReplayBuffer:
+class ReplayBuffer(BaseReplayBuffer):
+    """Uniform experience replay buffer."""
+
+    def __init__(self, capacity):
+        super().__init__(capacity)
+        self.memory = deque(maxlen=capacity)
+
+    def push(self, state, action, reward, next_state, done, _td_error=None):
+        self.memory.append((state, action, reward, next_state, done))
+
+
+class PrioritizedReplayBuffer(BaseReplayBuffer):
     """Prioritized Experience Replay (PER) buffer with importance-sampling weights."""
 
     def __init__(self, capacity, alpha=0.6, eps=1e-6, seed=None):
-        self.capacity = capacity
+        super().__init__(capacity)
         self.alpha = alpha
         self.eps = eps
         self.memory = [None] * capacity
@@ -105,7 +117,7 @@ class PrioritizedReplayBuffer:
         return self.size
 
 
-class NstepReplayBuffer:
+class NstepReplayBuffer(BaseReplayBuffer):
     """N-step return replay buffer with uniform sampling.
 
     Accumulates n consecutive transitions and stores a single transition
@@ -114,7 +126,7 @@ class NstepReplayBuffer:
     """
 
     def __init__(self, capacity, n_step=3, gamma=0.99):
-        self.capacity = capacity
+        super().__init__(capacity)
         self.n_step = n_step
         self.gamma = gamma
         self.memory = deque(maxlen=capacity)
@@ -146,27 +158,6 @@ class NstepReplayBuffer:
 
         self.memory.append((state, action, nstep_return, next_state, done))
         self._buffer.popleft()
-
-    def sample(self, batch_size, _beta=0.4):
-        batch = random.sample(self.memory, batch_size)
-        states, actions, rewards, next_states, dones = zip(*batch)
-        return (
-            np.array(states),
-            np.array(actions),
-            np.array(rewards, dtype=np.float32),
-            np.array(next_states),
-            np.array(dones, dtype=np.float32),
-        )
-
-    def update_priorities(self, indices, td_errors):
-        # No-op: n-step buffer does not use priorities
-        pass
-
-    def mean_priority(self):
-        return 0.0
-
-    def __len__(self):
-        return len(self.memory)
 
 
 def create_buffer(config):
