@@ -1,2 +1,5 @@
 [tool.pytest.ini_options]
 pythonpath = ["."]
+markers = [
+    "requires_cuda: mark test as requiring CUDA GPU",
+]

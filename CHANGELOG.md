@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `tests/conftest.py`: session-scoped autouse fixture `validate_environment` that emits `warnings.warn` when `.venv` is not active or CUDA is unavailable (silent in CI).
+- `tests/conftest.py`: `pytest_sessionstart` banner displaying Python version, PyTorch version, CUDA availability, CUDA device name, venv status, and CI detection at the start of every test session.
+- `tests/conftest.py`: marker `@pytest.mark.requires_cuda` with automatic skip via `pytest_collection_modifyitems` when CUDA is not available; registered programmatically and in `pyproject.toml`.
+- `pyproject.toml`: `markers` entry for `requires_cuda` in `[tool.pytest.ini_options]`.
+
 ## [2.0.0] - 2026-04-07
 
 ### Added

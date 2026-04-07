@@ -1,6 +1,81 @@
 """Shared fixtures for DQN_Framework unit tests."""
+import os
+import sys
+import warnings
+
 import pytest
+import torch
+
 from config.config import Config
+
+
+# ---------------------------------------------------------------------------
+# Environment helpers
+# ---------------------------------------------------------------------------
+
+def _is_ci():
+    return os.environ.get("CI", "").lower() == "true"
+
+
+def _is_venv():
+    return sys.prefix != sys.base_prefix
+
+
+# ---------------------------------------------------------------------------
+# Pytest hooks
+# ---------------------------------------------------------------------------
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "requires_cuda: mark test as requiring CUDA GPU",
+    )
+
+
+def pytest_sessionstart(session):
+    cuda_available = torch.cuda.is_available()
+    cuda_device = torch.cuda.get_device_name(0) if cuda_available else "N/A"
+    python_ver = sys.version.split()[0]
+    print(f"\n{'=' * 60}")
+    print("DQN Framework Test Session")
+    print(f"Python:         {python_ver}")
+    print(f"PyTorch:        {torch.__version__}")
+    print(f"CUDA available: {cuda_available}")
+    print(f"CUDA device:    {cuda_device}")
+    print(f"venv active:    {_is_venv()}")
+    print(f"CI:             {_is_ci()}")
+    print(f"{'=' * 60}\n")
+
+
+def pytest_collection_modifyitems(config, items):
+    if torch.cuda.is_available():
+        return
+    skip_no_cuda = pytest.mark.skip(reason="CUDA not available")
+    for item in items:
+        if "requires_cuda" in item.keywords:
+            item.add_marker(skip_no_cuda)
+
+
+# ---------------------------------------------------------------------------
+# Autouse environment validation fixture
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True, scope="session")
+def validate_environment():
+    if _is_ci():
+        return
+    if not _is_venv():
+        warnings.warn(
+            "Running outside .venv! CUDA PyTorch may not be available. "
+            r"Activate .venv first: .\.venv\Scripts\Activate.ps1",
+            stacklevel=1,
+        )
+    if not torch.cuda.is_available():
+        warnings.warn(
+            "CUDA is not available. Tests will run on CPU (slower). "
+            "Ensure .venv is active with CUDA PyTorch installed.",
+            stacklevel=1,
+        )
 
 
 @pytest.fixture
