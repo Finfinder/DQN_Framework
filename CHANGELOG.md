@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `tests/conftest.py`: marker `@pytest.mark.requires_cuda` with automatic skip via `pytest_collection_modifyitems` when CUDA is not available; registered programmatically and in `pyproject.toml`.
 - `pyproject.toml`: `markers` entry for `requires_cuda` in `[tool.pytest.ini_options]`.
 
+### Removed
+- `confirm_test.py`: removed the one-off multi-seed confirmation script — its functionality is fully covered by `tuning_test.py` (which uses shared helpers from `utils/training.py`). The file had 0% test coverage and was not used in CI. Reference to `confirm_test.py` also removed from `sonar.coverage.exclusions` in `sonar-project.properties`.
+
 ## [2.0.0] - 2026-04-07
 
 ### Added
