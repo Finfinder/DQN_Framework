@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `tests/test_cnn_dqn_network.py`: 25 new unit tests across 4 test classes (`TestCNNDQNCreation`, `TestCNNDQNForwardStandard`, `TestCNNDQNForwardDueling`, `TestCNNDQNFactory`) covering forward pass of `CNNDQN` — instantiation, output shape/dtype, NaN/Inf checks, advantage normalization, production 84×84 config, and `create_network()` factory integration. Tests are CPU-only, compatible with CI. Coverage of `models/cnn_dqn_network.py` raised from 11.32% to 100%.
+- `tests/conftest.py`: `cnn_config` fixture with minimal CNN parameters (`cnn_hidden_dim=64`, `conv_layers=[(8,4,2),(16,3,1)]`, `frame_size=[32,32]`) for fast CPU test execution.
+
+### Added
 - `tests/test_analyze.py`: 47 new unit tests across 14 new test classes covering all major functions in `utils/analyze.py` — `_diagnose_trend`, `_diagnose_epsilon`, `_diagnose_td_error`, `_diagnose_eval_vs_train`, `diagnose`, `list_runs`, `load_run`, `load_latest`, `compare_runs`, `run_summary`, `build_summary_report`, `export_summary_report`, `parse_args`, `_print_env_list`, `_print_train_eval_results`, `main`. Tests use `unittest.mock.patch`, in-memory `pd.DataFrame`, `tmp_path` fixture and `capsys` — no real CSV files read from disk. Coverage of `utils/analyze.py` raised from 18.75% to 97%.
 
 ### Changed

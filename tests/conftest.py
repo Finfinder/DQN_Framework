@@ -119,3 +119,13 @@ def per_config():
     cfg.tau = 0.01
     return cfg
 
+
+@pytest.fixture
+def cnn_config():
+    """Config for CNN tests — minimal parameters for fast CPU execution."""
+    cfg = Config("ALE/Pong-v5")
+    cfg.cnn_hidden_dim = 64
+    cfg.conv_layers = [(8, 4, 2), (16, 3, 1)]
+    cfg.frame_size = [32, 32]
+    return cfg
+
