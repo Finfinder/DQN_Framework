@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `scripts/validate_version_consistency.py`: new lightweight CLI validator checking consistency between `version.py`, the README version badge and the matching `CHANGELOG.md` section. The validator also accepts an optional expected release version in `X.Y.Z` or `vX.Y.Z` format for release preflight checks.
+- `tests/test_version_consistency.py`: unit and workflow contract tests covering the new validator, including happy path, version mismatch, invalid badge format, missing changelog section and release workflow integration.
+- `.pre-commit-config.yaml`: optional local pre-commit hook running the same version consistency validator as CI.
+
+### Changed
+- `.github/workflows/ci.yml`: added a blocking version consistency step before dependency installation and the more expensive smoke and test jobs.
+- `.github/workflows/release.yml`: added Python setup and a release preflight version consistency check before publishing a GitHub Release.
+- `README.md`: documented the optional local hook and the blocking CI check for version consistency.
+
+### Added
 - `tests/test_cnn_dqn_network.py`: 25 new unit tests across 4 test classes (`TestCNNDQNCreation`, `TestCNNDQNForwardStandard`, `TestCNNDQNForwardDueling`, `TestCNNDQNFactory`) covering forward pass of `CNNDQN` — instantiation, output shape/dtype, NaN/Inf checks, advantage normalization, production 84×84 config, and `create_network()` factory integration. Tests are CPU-only, compatible with CI. Coverage of `models/cnn_dqn_network.py` raised from 11.32% to 100%.
 - `tests/conftest.py`: `cnn_config` fixture with minimal CNN parameters (`cnn_hidden_dim=64`, `conv_layers=[(8,4,2),(16,3,1)]`, `frame_size=[32,32]`) for fast CPU test execution.
 

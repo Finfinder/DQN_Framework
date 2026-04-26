@@ -55,6 +55,18 @@ pip install torch gymnasium numpy matplotlib tensorboard
 pip install "gymnasium[atari]" ale-py opencv-python
 ```
 
+## Version consistency validation
+
+The repository includes a lightweight validator for release metadata consistency:
+
+```bash
+python scripts/validate_version_consistency.py --repo-root .
+```
+
+It checks that `version.py`, the README version badge and the matching `CHANGELOG.md` section stay in sync.
+
+CI runs this check as a blocking step before the more expensive jobs. An optional local `.pre-commit-config.yaml` is also provided for faster feedback, but CI remains the source of truth.
+
 ---
 
 ## Quick Start
