@@ -166,6 +166,6 @@ tensorboard --logdir logs
 ## Przed commitem
 
 Sprawdź, czy nie trzeba zaktualizować:
+- `Otwarcie nowego brancha wersyjnego` — w tym samym kroku zaktualizuj `version.py` oraz widoczną wersję w `README.md`
 - `README.md` — jeśli zmiana wpływa na dokumentację użytkownika
 - `CHANGELOG.md` — dodaj wpis w sekcji `[Unreleased]`
-- `version.py` — jeśli zmiana wymaga nowej wersji

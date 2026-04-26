@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `.pre-commit-config.yaml`: optional local pre-commit hook running the same version consistency validator as CI.
 
 ### Changed
+- `.github/instructions/dqn-framework.instructions.md`: clarified that opening a new version branch requires updating `version.py` and `README.md` in the same commit
 - `.github/workflows/ci.yml`: added a blocking version consistency step before dependency installation and the more expensive smoke and test jobs.
 - `.github/workflows/release.yml`: added Python setup and a release preflight version consistency check before publishing a GitHub Release.
 - `README.md`: documented the optional local hook and the blocking CI check for version consistency.
