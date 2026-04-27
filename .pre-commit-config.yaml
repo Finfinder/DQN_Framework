@@ -3,6 +3,6 @@ repos:
     hooks:
       - id: validate-version-consistency
         name: validate-version-consistency
-        entry: python scripts/validate_version_consistency.py --repo-root .
+        entry: python ../AI_Instruction/hooks/validate_version_consistency_hook.py
         language: python
         pass_filenames: false

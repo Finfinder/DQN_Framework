@@ -112,17 +112,18 @@ class TestWorkflowContracts:
             Path(__file__).resolve().parent.parent / ".github" / "workflows" / "ci.yml"
         ).read_text(encoding="utf-8")
 
-        assert "scripts/validate_version_consistency.py" in workflow_text
-        assert "Validate version consistency" in workflow_text
+        assert "reusable-version-consistency.yml@main" in workflow_text
+        assert "repository-ref: ${{ github.sha }}" in workflow_text
+        assert "scripts/validate_version_consistency.py" not in workflow_text
 
     def test_release_workflow_runs_version_validator(self):
         workflow_text = (
             Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release.yml"
         ).read_text(encoding="utf-8")
 
-        assert "scripts/validate_version_consistency.py" in workflow_text
-        assert "--expected-version" in workflow_text
-        assert "github.ref_name" in workflow_text
+        assert "reusable-version-consistency.yml@main" in workflow_text
+        assert "expected-version: ${{ github.ref_name }}" in workflow_text
+        assert "scripts/validate_version_consistency.py" not in workflow_text
 
     def test_pre_commit_hook_runs_version_validator(self):
         hook_text = (
@@ -130,6 +131,6 @@ class TestWorkflowContracts:
         ).read_text(encoding="utf-8")
 
         assert "validate-version-consistency" in hook_text
-        assert "scripts/validate_version_consistency.py --repo-root ." in hook_text
+        assert "../AI_Instruction/hooks/validate_version_consistency_hook.py" in hook_text
         assert "language: python" in hook_text
         assert "pass_filenames: false" in hook_text
