@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `.github/workflows/open-next-version-branch.yml`: automated next-version branch creation triggered by successful Release workflow; updates `version.py` and `README.md` with the `next_version` provided before the release
+- `.github/workflows/release.yml`: extended with validation and upload of `next-version-request` artifact for the central automation workflow in `AI_Instruction`
 - `scripts/validate_version_consistency.py`: new lightweight CLI validator checking consistency between `version.py`, the README version badge and the matching `CHANGELOG.md` section. The validator also accepts an optional expected release version in `X.Y.Z` or `vX.Y.Z` format for release preflight checks.
 - `tests/test_version_consistency.py`: unit and workflow contract tests covering the new validator, including happy path, version mismatch, invalid badge format, missing changelog section and release workflow integration.
 - `.pre-commit-config.yaml`: optional local pre-commit hook running the same version consistency validator as CI.
