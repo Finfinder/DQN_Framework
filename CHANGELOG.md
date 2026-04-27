@@ -16,9 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 - `.github/instructions/dqn-framework.instructions.md`: clarified that opening a new version branch requires updating `version.py` and `README.md` in the same commit
-- `.github/workflows/ci.yml`: added a blocking version consistency step before dependency installation and the more expensive smoke and test jobs.
-- `.github/workflows/release.yml`: added Python setup and a release preflight version consistency check before publishing a GitHub Release.
-- `README.md`: documented the optional local hook and the blocking CI check for version consistency.
+- `.github/workflows/ci.yml`: migrated the blocking version consistency gate to the shared reusable workflow from `AI_Instruction`, before the more expensive smoke and test jobs.
+- `.github/workflows/release.yml`: migrated release preflight version validation to the shared reusable workflow from `AI_Instruction`, while keeping tag-based release publishing and `next-version-request` validation intact.
+- `.pre-commit-config.yaml`: migrated the optional local hook to the shared `AI_Instruction` adapter so local feedback uses the same base contract as CI.
+- `README.md`: documented that CI and the optional local hook now use the shared `AI_Instruction` validator for the base `version.py + README.md` contract, while the repo-local script remains an optional stricter release-prep helper.
 
 ### Added
 - `tests/test_cnn_dqn_network.py`: 25 new unit tests across 4 test classes (`TestCNNDQNCreation`, `TestCNNDQNForwardStandard`, `TestCNNDQNForwardDueling`, `TestCNNDQNFactory`) covering forward pass of `CNNDQN` — instantiation, output shape/dtype, NaN/Inf checks, advantage normalization, production 84×84 config, and `create_network()` factory integration. Tests are CPU-only, compatible with CI. Coverage of `models/cnn_dqn_network.py` raised from 11.32% to 100%.

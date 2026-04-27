@@ -6,7 +6,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  version-consistency:
+    permissions:
+      contents: read
+    uses: Finfinder/AI_Instruction/.github/workflows/reusable-version-consistency.yml@main
+    with:
+      source-repository: ${{ github.repository }}
+      repository-ref: ${{ github.sha }}
+    secrets: inherit
+
   lint-and-smoke:
+    needs: [version-consistency]
     runs-on: ubuntu-latest
 
     steps:
@@ -18,10 +28,6 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-
-      - name: Validate version consistency
-        run: |
-          python scripts/validate_version_consistency.py --repo-root .
 
       - name: Install dependencies (CPU CI subset)
         run: |

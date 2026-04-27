@@ -57,15 +57,17 @@ pip install "gymnasium[atari]" ale-py opencv-python
 
 ## Version consistency validation
 
-The repository includes a lightweight validator for release metadata consistency:
+The base `version.py + README.md` contract is now enforced by the shared validator from `AI_Instruction`, using the repo-local descriptors in `.github/versioning/`.
+
+CI runs this shared check as a blocking gate before the more expensive jobs, and the optional local `.pre-commit-config.yaml` calls the same shared hook for faster feedback. CI remains the source of truth.
+
+The repository still includes a stricter local validator for release metadata consistency:
 
 ```bash
 python scripts/validate_version_consistency.py --repo-root .
 ```
 
-It checks that `version.py`, the README version badge and the matching `CHANGELOG.md` section stay in sync.
-
-CI runs this check as a blocking step before the more expensive jobs. An optional local `.pre-commit-config.yaml` is also provided for faster feedback, but CI remains the source of truth.
+This optional script additionally checks that the matching `CHANGELOG.md` section stays in sync, so it can still be used as a manual release-prep helper when a stricter local check is useful.
 
 ---
 
