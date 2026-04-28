@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `.github/instructions/dqn-framework.instructions.md`: clarified that opening a new version branch requires updating `version.py` and `README.md` in the same commit
 - `.github/workflows/ci.yml`: migrated the blocking version consistency gate to the shared reusable workflow from `AI_Instruction`, before the more expensive smoke and test jobs.
 - `.github/workflows/release.yml`: migrated release preflight version validation to the shared reusable workflow from `AI_Instruction`, while keeping tag-based release publishing and `next-version-request` validation intact.
+- `.github/workflows/release.yml`: inline validation of `next_version` manifest replaced by shared reusable workflow `Finfinder/AI_Instruction/.github/workflows/reusable-next-version-request.yml`; updated `tests/test_version_consistency.py` to assert the shared adapter is used and no inline validator remains.
 - `.pre-commit-config.yaml`: migrated the optional local hook to the shared `AI_Instruction` adapter so local feedback uses the same base contract as CI.
 - `README.md`: documented that CI and the optional local hook now use the shared `AI_Instruction` validator for the base `version.py + README.md` contract, while the repo-local script remains an optional stricter release-prep helper.
 

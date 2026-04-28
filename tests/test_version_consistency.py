@@ -122,8 +122,13 @@ class TestWorkflowContracts:
         ).read_text(encoding="utf-8")
 
         assert "reusable-version-consistency.yml@main" in workflow_text
+        assert "reusable-next-version-request.yml@main" in workflow_text
+        assert "source-repository: ${{ github.repository }}" in workflow_text
+        assert "repository-ref: ${{ github.ref }}" in workflow_text
         assert "expected-version: ${{ github.ref_name }}" in workflow_text
+        assert "expected-release-version: ${{ github.ref_name }}" in workflow_text
         assert "scripts/validate_version_consistency.py" not in workflow_text
+        assert "Validate next version request" not in workflow_text
 
     def test_pre_commit_hook_runs_version_validator(self):
         hook_text = (
