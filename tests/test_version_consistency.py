@@ -124,11 +124,16 @@ class TestWorkflowContracts:
 
         assert "uses: ./.github/workflows/reusable-version-consistency.yml" in workflow_text
         assert "uses: ./.github/workflows/reusable-next-version-request.yml" in workflow_text
+        assert (
+            "uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe"
+            in workflow_text
+        )
         assert "source-repository: ${{ github.repository }}" in workflow_text
         assert "repository-ref: ${{ github.ref }}" in workflow_text
         assert "expected-version: ${{ github.ref_name }}" in workflow_text
         assert "expected-release-version: ${{ github.ref_name }}" in workflow_text
         assert "Finfinder/AI_Instruction" not in workflow_text
+        assert "softprops/action-gh-release@v2" not in workflow_text
         assert "scripts/validate_version_consistency.py" not in workflow_text
         assert "Validate next version request" not in workflow_text
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+
+- `tests/test_version_consistency.py`: add regression contract assertions enforcing full 40-character commit SHA for `softprops/action-gh-release` and blocking reversion to mutable tag `@v2`
+
 ## [2.1.1] - 2026-05-09
 
 ### Changed
