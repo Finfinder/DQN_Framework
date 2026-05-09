@@ -57,9 +57,9 @@ pip install "gymnasium[atari]" ale-py opencv-python
 
 ## Version consistency validation
 
-The base `version.py + README.md` contract is now enforced by the shared validator from `AI_Instruction`, using the repo-local descriptors in `.github/versioning/`.
+The base `version.py + README.md` contract is enforced by repo-local reusable workflows and validators, using the repo-local descriptors in `.github/versioning/`.
 
-CI runs this shared check as a blocking gate before the more expensive jobs, and the optional local `.pre-commit-config.yaml` calls the same shared hook for faster feedback. CI remains the source of truth.
+CI runs this repo-local check as a blocking gate before the more expensive jobs, and the optional local `.pre-commit-config.yaml` calls the same repo-local hook for faster feedback. CI remains the source of truth.
 
 The repository still includes a stricter local validator for release metadata consistency:
 
