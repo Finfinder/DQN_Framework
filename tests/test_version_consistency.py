@@ -139,10 +139,18 @@ class TestWorkflowContracts:
             / "workflows"
             / "open-next-version-branch.yml"
         ).read_text(encoding="utf-8")
+        reusable_workflow_text = (
+            Path(__file__).resolve().parent.parent
+            / ".github"
+            / "workflows"
+            / "reusable-open-next-version-branch.yml"
+        ).read_text(encoding="utf-8")
 
         assert "uses: ./.github/workflows/reusable-open-next-version-branch.yml" in workflow_text
         assert "artifact-name: next-version-request" in workflow_text
         assert "base-branch: main" in workflow_text
+        assert "commit_created" in reusable_workflow_text
+        assert "branch_name" in reusable_workflow_text
         assert "Finfinder/AI_Instruction" not in workflow_text
 
     def test_pre_commit_hook_runs_version_validator(self):
