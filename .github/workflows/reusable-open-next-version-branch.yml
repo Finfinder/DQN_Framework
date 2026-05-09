@@ -98,8 +98,8 @@ jobs:
             -BaseBranch $env:BASE_BRANCH
 
           "status=$($result.Status)" >> $env:GITHUB_OUTPUT
-          "branch-name=$($result.BranchName)" >> $env:GITHUB_OUTPUT
-          "commit-created=$([string]$result.CommitCreated).ToLowerInvariant()" >> $env:GITHUB_OUTPUT
+          "branch_name=$($result.BranchName)" >> $env:GITHUB_OUTPUT
+          "commit_created=$([string]$result.CommitCreated).ToLowerInvariant()" >> $env:GITHUB_OUTPUT
 
       - name: Clean workflow scratch files
         if: always()
@@ -111,9 +111,9 @@ jobs:
           }
 
       - name: Push next version branch
-        if: ${{ steps.open.outputs.status == 'updated' && steps.open.outputs.commit-created == 'true' }}
+        if: ${{ steps.open.outputs.status == 'updated' && steps.open.outputs.commit_created == 'true' }}
         working-directory: repository
-        run: git push origin HEAD:${{ steps.open.outputs.branch-name }}
+        run: git push origin HEAD:${{ steps.open.outputs.branch_name }}
 
       - name: Write summary
         shell: pwsh
@@ -126,4 +126,5 @@ jobs:
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Repository: $env:SOURCE_REPOSITORY"
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Workflow run: $env:WORKFLOW_RUN_ID"
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Status: ${{ steps.open.outputs.status }}"
-          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Branch: ${{ steps.open.outputs.branch-name }}"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Branch: ${{ steps.open.outputs.branch_name }}"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Commit created: ${{ steps.open.outputs.commit_created }}"
