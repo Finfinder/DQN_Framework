@@ -1,0 +1,15 @@
+# Linux CI subset for GitHub Actions on Python 3.11.
+# Keep this file separate from the local CUDA profile in requirements.txt.
+# Refresh ci.lock.txt from Linux only (native Linux or a python:3.11 container).
+# A lock generated on Windows misses Ubuntu-specific torch dependencies and breaks
+# `python -m pip install --require-hashes --only-binary=:all:` in CI.
+
+torch==2.5.1
+numpy==2.3.5
+matplotlib==3.10.8
+tensorboard==2.20.0
+gymnasium==1.2.3
+pandas==3.0.1
+ruff==0.11.11
+pytest==9.0.2
+pytest-cov==7.1.0

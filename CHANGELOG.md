@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-05-09
+
+### Changed
+
+- `.github/workflows/ci.yml`, `.github/workflows/sonar.yml`: replaced ad-hoc `pip install` commands with a locked dependency file using `--require-hashes --only-binary=:all:` to harden Python dependency installation against supply-chain attacks (OWASP A06)
+
+### Added
+
+- `.github/requirements/ci.in`: top-level manifest declaring CI top-level dependencies pinned to exact versions; serves as source of truth for regenerating the lock file
+- `.github/requirements/ci.lock.txt`: full deterministic lock file with SHA256 hashes for all transitive dependencies; generated on Linux (`python:3.11` Docker image) to include Ubuntu-specific `torch` and `nvidia-*` packages
+
 ## [2.1.0] - 2026-05-09
 
 ### Added

@@ -31,12 +31,15 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
+          cache-dependency-path: ".github/requirements/ci.lock.txt"
 
-      - name: Install dependencies (CPU CI subset)
+      - name: Install locked dependencies (Linux CI subset)
         run: |
-          python -m pip install --upgrade pip
-          pip install torch==2.5.1 numpy matplotlib tensorboard gymnasium pandas
-          pip install pytest pytest-cov
+          python -m pip install --require-hashes --only-binary=:all: -r .github/requirements/ci.lock.txt
+
+      - name: Validate installed dependencies
+        run: |
+          python -m pip check
 
       - name: Run unit tests with coverage
         run: |
