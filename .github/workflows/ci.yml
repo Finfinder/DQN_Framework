@@ -42,7 +42,7 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov-report=xml:coverage.xml -q
+          pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov=scripts --cov-report=xml:coverage.xml -q
 
       - name: Compile all Python files
         run: |
