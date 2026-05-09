@@ -112,8 +112,9 @@ class TestWorkflowContracts:
             Path(__file__).resolve().parent.parent / ".github" / "workflows" / "ci.yml"
         ).read_text(encoding="utf-8")
 
-        assert "reusable-version-consistency.yml@main" in workflow_text
+        assert "uses: ./.github/workflows/reusable-version-consistency.yml" in workflow_text
         assert "repository-ref: ${{ github.sha }}" in workflow_text
+        assert "Finfinder/AI_Instruction" not in workflow_text
         assert "scripts/validate_version_consistency.py" not in workflow_text
 
     def test_release_workflow_runs_version_validator(self):
@@ -121,14 +122,28 @@ class TestWorkflowContracts:
             Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release.yml"
         ).read_text(encoding="utf-8")
 
-        assert "reusable-version-consistency.yml@main" in workflow_text
-        assert "reusable-next-version-request.yml@main" in workflow_text
+        assert "uses: ./.github/workflows/reusable-version-consistency.yml" in workflow_text
+        assert "uses: ./.github/workflows/reusable-next-version-request.yml" in workflow_text
         assert "source-repository: ${{ github.repository }}" in workflow_text
         assert "repository-ref: ${{ github.ref }}" in workflow_text
         assert "expected-version: ${{ github.ref_name }}" in workflow_text
         assert "expected-release-version: ${{ github.ref_name }}" in workflow_text
+        assert "Finfinder/AI_Instruction" not in workflow_text
         assert "scripts/validate_version_consistency.py" not in workflow_text
         assert "Validate next version request" not in workflow_text
+
+    def test_open_next_version_branch_uses_local_reusable_workflow(self):
+        workflow_text = (
+            Path(__file__).resolve().parent.parent
+            / ".github"
+            / "workflows"
+            / "open-next-version-branch.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "uses: ./.github/workflows/reusable-open-next-version-branch.yml" in workflow_text
+        assert "artifact-name: next-version-request" in workflow_text
+        assert "base-branch: main" in workflow_text
+        assert "Finfinder/AI_Instruction" not in workflow_text
 
     def test_pre_commit_hook_runs_version_validator(self):
         hook_text = (
@@ -136,6 +151,6 @@ class TestWorkflowContracts:
         ).read_text(encoding="utf-8")
 
         assert "validate-version-consistency" in hook_text
-        assert "../AI_Instruction/hooks/validate_version_consistency_hook.py" in hook_text
+        assert "hooks/validate_version_consistency_hook.py" in hook_text
         assert "language: python" in hook_text
         assert "pass_filenames: false" in hook_text

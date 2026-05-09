@@ -9,11 +9,10 @@ jobs:
   version-consistency:
     permissions:
       contents: read
-    uses: Finfinder/AI_Instruction/.github/workflows/reusable-version-consistency.yml@main
+    uses: ./.github/workflows/reusable-version-consistency.yml
     with:
       source-repository: ${{ github.repository }}
       repository-ref: ${{ github.sha }}
-    secrets: inherit
 
   lint-and-smoke:
     needs: [version-consistency]
@@ -42,7 +41,7 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov-report=xml:coverage.xml -q
+          pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov=scripts --cov-report=xml:coverage.xml -q
 
       - name: Compile all Python files
         run: |

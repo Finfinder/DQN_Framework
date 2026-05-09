@@ -151,3 +151,53 @@ Po wypchnięciu zmian:
 |---|---|
 | 2026-04-06 | Implementacja: rozszerzono `sonar.coverage.exclusions` o `utils/analyze.py` i `models/cnn_dqn_network.py` |
 | 2026-04-06 | Code review: APPROVED — 0 findings |
+| 2026-04-26 | Code review #2 (sesja 2.1.0 final) — wykryto brakujące `--cov=scripts` w CI; naprawiono natychmiast |
+
+## Code Review Findings — Przegląd #2 (2026-04-26)
+
+**Przegląd**: 2026-04-26 | **Wynik**: APPROVED WITH FIX
+
+### Kontekst
+
+Ten przegląd obejmuje całościową weryfikację Quality Gate w kontekście kompletnej implementacji 2.1.0, po zatwierdzeniu wszystkich pozostałych planów.
+
+### Nowe ustalenie: brakujące `--cov=scripts` w CI
+
+| # | Severity | Opis | Status |
+|---|---|---|---|
+| F-1 | **CRITICAL** | `scripts/validate_version_consistency.py` dodany w 2.1.0 nie był pokrywany przez CI coverage, ponieważ `--cov=scripts` było nieobecne w komendzie pytest w `.github/workflows/ci.yml`. SonarCloud raportował 0% dla pliku (81 linii), obniżając `new_coverage` do 61% przy progu 80%. | ✅ Naprawione |
+
+### Diagnoza
+
+Plik `tests/test_version_consistency.py` zawiera 14 testów importujących bezpośrednio z `scripts.validate_version_consistency` — pokrycie rzeczywiste wynosi **95%** (77/81 linii). Problem leżał wyłącznie w konfiguracji CI:
+
+```bash
+# PRZED (błąd — brakuje --cov=scripts)
+pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov-report=xml:coverage.xml -q
+
+# PO (poprawne)
+pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov=scripts --cov-report=xml:coverage.xml -q
+```
+
+### Wyniki po naprawie (lokalnie)
+
+| Plik | Coverage przed | Coverage po |
+|---|---|---|
+| `scripts/validate_version_consistency.py` | 0% (SonarCloud) | **95%** |
+| Łączne pokrycie (localne) | — | **94%** (711 stmts, 40 miss) |
+| Testy | 193 passed | 193 passed ✅ |
+
+### Prognoza Quality Gate
+
+Po pushu do CI i ponownej analizie SonarCloud `new_coverage` powinna przekroczyć próg 80%.
+
+### Linie bez pokrycia w validate_version_consistency.py
+
+| Linia | Scenariusz | Ocena |
+|---|---|---|
+| 19 | `VersionConsistencyError` gdy plik nie istnieje (`path.exists()` = False) | INFO — defensywna gałąź |
+| 26 | Brak dopasowania `_VERSION_RE` w version.py | INFO — edge case |
+| 137 | `sys.exit(0)` po sukcesie `main()` | INFO — guard CLI |
+| 141 | `if __name__ == "__main__":` | INFO — guard modułowy |
+
+Żaden z tych scenariuszy nie jest krytyczny.

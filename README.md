@@ -3,7 +3,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![Gymnasium](https://img.shields.io/badge/Gymnasium-RL%20Environments-0081A5)](https://gymnasium.farama.org/)
-[![Version](https://img.shields.io/badge/version-2.0.0-green)]()
+[![Version](https://img.shields.io/badge/version-2.1.0-green)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/Finfinder/DQN_Framework/ci.yml?label=CI&logo=github)](https://github.com/Finfinder/DQN_Framework/actions)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Finfinder_DQN_Framework&metric=alert_status)](https://sonarcloud.io/summary/overall?id=Finfinder_DQN_Framework)
@@ -57,9 +57,9 @@ pip install "gymnasium[atari]" ale-py opencv-python
 
 ## Version consistency validation
 
-The base `version.py + README.md` contract is now enforced by the shared validator from `AI_Instruction`, using the repo-local descriptors in `.github/versioning/`.
+The base `version.py + README.md` contract is enforced by repo-local reusable workflows and validators, using the repo-local descriptors in `.github/versioning/`.
 
-CI runs this shared check as a blocking gate before the more expensive jobs, and the optional local `.pre-commit-config.yaml` calls the same shared hook for faster feedback. CI remains the source of truth.
+CI runs this repo-local check as a blocking gate before the more expensive jobs, and the optional local `.pre-commit-config.yaml` calls the same repo-local hook for faster feedback. CI remains the source of truth.
 
 The repository still includes a stricter local validator for release metadata consistency:
 

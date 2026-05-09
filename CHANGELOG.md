@@ -7,20 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-05-09
+
 ### Added
 - `.github/workflows/open-next-version-branch.yml`: automated next-version branch creation triggered by successful Release workflow; updates `version.py` and `README.md` with the `next_version` provided before the release
-- `.github/workflows/release.yml`: extended with validation and upload of `next-version-request` artifact for the central automation workflow in `AI_Instruction`
+- `.github/workflows/release.yml`: extended with validation and upload of `next-version-request` artifact for the repo-local release automation workflow
+- `.github/workflows/reusable-version-consistency.yml`, `.github/workflows/reusable-next-version-request.yml`, `.github/workflows/reusable-open-next-version-branch.yml`: repo-local reusable workflows for version validation, next-version handoff, and next branch automation without external workflow dependencies
 - `scripts/validate_version_consistency.py`: new lightweight CLI validator checking consistency between `version.py`, the README version badge and the matching `CHANGELOG.md` section. The validator also accepts an optional expected release version in `X.Y.Z` or `vX.Y.Z` format for release preflight checks.
+- `scripts/validate-version-consistency.ps1`, `scripts/validate-next-version-request.ps1`, `scripts/open-next-version-branch.ps1`, `scripts/version-target-strategies.ps1`, `scripts/next-version-manifest.ps1`: repo-local PowerShell automation backing the reusable release workflows and next-version branch opening
 - `tests/test_version_consistency.py`: unit and workflow contract tests covering the new validator, including happy path, version mismatch, invalid badge format, missing changelog section and release workflow integration.
 - `.pre-commit-config.yaml`: optional local pre-commit hook running the same version consistency validator as CI.
+- `hooks/validate_version_consistency_hook.py`: repo-local hook wrapper invoking the same PowerShell validator as CI.
 
 ### Changed
 - `.github/instructions/dqn-framework.instructions.md`: clarified that opening a new version branch requires updating `version.py` and `README.md` in the same commit
-- `.github/workflows/ci.yml`: migrated the blocking version consistency gate to the shared reusable workflow from `AI_Instruction`, before the more expensive smoke and test jobs.
-- `.github/workflows/release.yml`: migrated release preflight version validation to the shared reusable workflow from `AI_Instruction`, while keeping tag-based release publishing and `next-version-request` validation intact.
-- `.github/workflows/release.yml`: inline validation of `next_version` manifest replaced by shared reusable workflow `Finfinder/AI_Instruction/.github/workflows/reusable-next-version-request.yml`; updated `tests/test_version_consistency.py` to assert the shared adapter is used and no inline validator remains.
-- `.pre-commit-config.yaml`: migrated the optional local hook to the shared `AI_Instruction` adapter so local feedback uses the same base contract as CI.
-- `README.md`: documented that CI and the optional local hook now use the shared `AI_Instruction` validator for the base `version.py + README.md` contract, while the repo-local script remains an optional stricter release-prep helper.
+- `.github/workflows/ci.yml`: migrated the blocking version consistency gate to a repo-local reusable workflow, before the more expensive smoke and test jobs.
+- `.github/workflows/ci.yml`: extended coverage collection with `--cov=scripts`, so SonarCloud receives coverage for `scripts/validate_version_consistency.py` instead of reporting it as 0% on new code.
+- `.github/workflows/release.yml`: migrated release preflight version validation to repo-local reusable workflows, while keeping tag-based release publishing and `next-version-request` validation intact.
+- `.github/workflows/release.yml`: inline validation of `next_version` manifest replaced by the repo-local reusable workflow `.github/workflows/reusable-next-version-request.yml`; updated `tests/test_version_consistency.py` to assert the local adapter is used and no inline validator remains.
+- `.github/workflows/open-next-version-branch.yml`: migrated next-version branch automation to the repo-local reusable workflow `.github/workflows/reusable-open-next-version-branch.yml`.
+- `.pre-commit-config.yaml`: migrated the optional local hook to the repo-local wrapper so local feedback uses the same base contract as CI.
+- `README.md`: documented that CI and the optional local hook now use the repo-local reusable validator for the base `version.py + README.md` contract, while the repo-local Python script remains an optional stricter release-prep helper.
 
 ### Added
 - `tests/test_cnn_dqn_network.py`: 25 new unit tests across 4 test classes (`TestCNNDQNCreation`, `TestCNNDQNForwardStandard`, `TestCNNDQNForwardDueling`, `TestCNNDQNFactory`) covering forward pass of `CNNDQN` — instantiation, output shape/dtype, NaN/Inf checks, advantage normalization, production 84×84 config, and `create_network()` factory integration. Tests are CPU-only, compatible with CI. Coverage of `models/cnn_dqn_network.py` raised from 11.32% to 100%.
