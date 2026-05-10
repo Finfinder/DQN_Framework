@@ -1,0 +1,17 @@
+name: Third-Party Action Pinning
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  third-party-action-pinning:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/reusable-third-party-action-pinning.yml
+    with:
+      source-repository: ${{ github.repository }}
+      repository-ref: ${{ github.sha }}

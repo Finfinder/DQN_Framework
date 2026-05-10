@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `.github/workflows/third-party-action-pinning.yml` and `.github/workflows/reusable-third-party-action-pinning.yml` — repo-local mirror of the monorepo SHA-pinning guard enforcing full 40-character SHA for third-party actions (stage 1)
+
 ### Security
 
 - `tests/test_version_consistency.py`: add regression contract assertions enforcing full 40-character commit SHA for `softprops/action-gh-release` and blocking reversion to mutable tag `@v2`
+- `SonarSource/sonarqube-scan-action` in `.github/workflows/sonar.yml` pinned to full commit SHA `fd88b7d7ccbaefd23d8f36f73b59db7a3d246602` (was `@v6`)
 
 ## [2.1.1] - 2026-05-09
 
