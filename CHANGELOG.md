@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 
 - `.github/workflows/third-party-action-pinning.yml` and `.github/workflows/reusable-third-party-action-pinning.yml` — repo-local mirror of the monorepo SHA-pinning guard enforcing full 40-character SHA for third-party actions (stage 1)
+- `.github/actions-security/zizmor.yml` — repo-local mirror of the canonical zizmor policy for third-party action pinning
+
+### Changed
+
+- `.github/workflows/reusable-version-consistency.yml`, `reusable-next-version-request.yml`, `reusable-open-next-version-branch.yml` — synced to canonical mirror via centralized sync engine; removed cross-repo AI_Instruction checkout
+- `.github/workflows/reusable-third-party-action-pinning.yml` — synced to repo-local policy bundle; policy resolved from `.github/actions-security/zizmor.yml` instead of cross-repo checkout
+- `scripts/` (`next-version-manifest.ps1`, `open-next-version-branch.ps1`, `validate-version-consistency.ps1`) — synced to canonical versions including UTF-8 without BOM writes
+- `tests/test_version_consistency.py` — extended with `test_third_party_action_pinning_uses_repo_local_policy_bundle` contract assertion
 
 ### Security
 

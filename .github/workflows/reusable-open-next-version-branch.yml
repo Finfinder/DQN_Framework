@@ -45,7 +45,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Checkout target repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           repository: ${{ inputs.source-repository }}
           ref: ${{ inputs.base-branch }}
@@ -98,8 +98,8 @@ jobs:
             -BaseBranch $env:BASE_BRANCH
 
           "status=$($result.Status)" >> $env:GITHUB_OUTPUT
-          "branch_name=$($result.BranchName)" >> $env:GITHUB_OUTPUT
-          "commit_created=$([string]$result.CommitCreated).ToLowerInvariant()" >> $env:GITHUB_OUTPUT
+          "branch-name=$($result.BranchName)" >> $env:GITHUB_OUTPUT
+          "commit-created=$([string]$result.CommitCreated).ToLowerInvariant()" >> $env:GITHUB_OUTPUT
 
       - name: Clean workflow scratch files
         if: always()
@@ -111,9 +111,9 @@ jobs:
           }
 
       - name: Push next version branch
-        if: ${{ steps.open.outputs.status == 'updated' && steps.open.outputs.commit_created == 'true' }}
+        if: ${{ steps.open.outputs.status == 'updated' && steps.open.outputs.commit-created == 'true' }}
         working-directory: repository
-        run: git push origin HEAD:${{ steps.open.outputs.branch_name }}
+        run: git push origin HEAD:${{ steps.open.outputs.branch-name }}
 
       - name: Write summary
         shell: pwsh
@@ -121,10 +121,9 @@ jobs:
           SOURCE_REPOSITORY: ${{ inputs.source-repository }}
           WORKFLOW_RUN_ID: ${{ inputs.workflow-run-id }}
         run: |
-          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '## Open Next Version Branch'
-          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value ''
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "## Open Next Version Branch"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value ""
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Repository: $env:SOURCE_REPOSITORY"
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Workflow run: $env:WORKFLOW_RUN_ID"
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Status: ${{ steps.open.outputs.status }}"
-          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Branch: ${{ steps.open.outputs.branch_name }}"
-          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Commit created: ${{ steps.open.outputs.commit_created }}"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "- Branch: ${{ steps.open.outputs.branch-name }}"

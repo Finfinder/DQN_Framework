@@ -47,11 +47,11 @@ function Test-IsChildPath {
     $normalizedChild = [System.IO.Path]::GetFullPath($ChildPath)
 
     if ($normalizedParent.Length -gt 3) {
-        $normalizedParent = $normalizedParent.TrimEnd([char[]]@('\', '/'))
+        $normalizedParent = $normalizedParent.TrimEnd('\', '/')
     }
 
     if ($normalizedChild.Length -gt 3) {
-        $normalizedChild = $normalizedChild.TrimEnd([char[]]@('\', '/'))
+        $normalizedChild = $normalizedChild.TrimEnd('\', '/')
     }
 
     if ($normalizedChild.Equals($normalizedParent, [System.StringComparison]::OrdinalIgnoreCase)) {

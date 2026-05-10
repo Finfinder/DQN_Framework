@@ -154,9 +154,27 @@ class TestWorkflowContracts:
         assert "uses: ./.github/workflows/reusable-open-next-version-branch.yml" in workflow_text
         assert "artifact-name: next-version-request" in workflow_text
         assert "base-branch: main" in workflow_text
-        assert "commit_created" in reusable_workflow_text
-        assert "branch_name" in reusable_workflow_text
+        assert "commit-created" in reusable_workflow_text
+        assert "branch-name" in reusable_workflow_text
+        assert "commit_created" not in reusable_workflow_text
+        assert "branch_name" not in reusable_workflow_text
         assert "Finfinder/AI_Instruction" not in workflow_text
+
+    def test_third_party_action_pinning_uses_repo_local_policy_bundle(self):
+        repository_root = Path(__file__).resolve().parent.parent
+        wrapper_text = (repository_root / ".github" / "workflows" / "third-party-action-pinning.yml").read_text(
+            encoding="utf-8"
+        )
+        reusable_text = (
+            repository_root / ".github" / "workflows" / "reusable-third-party-action-pinning.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "uses: ./.github/workflows/reusable-third-party-action-pinning.yml" in wrapper_text
+        assert "Join-Path $repositoryRoot '.github/actions-security/zizmor.yml'" in reusable_text
+        assert "Policy source: repo-local mirror" in reusable_text
+        assert "automation-repository:" not in reusable_text
+        assert "Join-Path $env:RUNNER_TEMP 'zizmor-third-party-action-pinning.yml'" not in reusable_text
+        assert (repository_root / ".github" / "actions-security" / "zizmor.yml").exists()
 
     def test_pre_commit_hook_runs_version_validator(self):
         hook_text = (
