@@ -19,10 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `scripts/` (`next-version-manifest.ps1`, `open-next-version-branch.ps1`, `validate-version-consistency.ps1`) — synced to canonical versions including UTF-8 without BOM writes
 - `tests/test_version_consistency.py` — extended with `test_third_party_action_pinning_uses_repo_local_policy_bundle` contract assertion
 
+### Changed
+
+- GitHub Actions bumped to Node.js 24 runtime: `actions/checkout` v4→v5, `actions/setup-python` v5→v6, `actions/upload-artifact` v5→v6, `actions/download-artifact` v6→v7 across `ci.yml`, `release.yml`, `reusable-next-version-request.yml`, `reusable-open-next-version-branch.yml`, and `reusable-third-party-action-pinning.yml`
+- `tests/test_version_consistency.py` — updated contract assertions to match `actions/checkout@v5` and `actions/setup-python@v6`
+
 ### Security
 
 - `tests/test_version_consistency.py`: add regression contract assertions enforcing full 40-character commit SHA for `softprops/action-gh-release` and blocking reversion to mutable tag `@v2`
-- `SonarSource/sonarqube-scan-action` in `.github/workflows/sonar.yml` pinned to full commit SHA `fd88b7d7ccbaefd23d8f36f73b59db7a3d246602` (was `@v6`)
+- `SonarSource/sonarqube-scan-action` in `.github/workflows/sonar.yml` bumped from SHA `fd88b7d7ccbaefd23d8f36f73b59db7a3d246602` (v6) to `c7ee0f9df90b7aa20e8dcf9695dcfe2e7da5b4f2` (v7.2.1)
+- `softprops/action-gh-release` in `release.yml` bumped from SHA `153bb8e...` (v2.6.1) to `b4309332981a82ec1c5618f44dd2e27cc8bfbfda` (v3.0.0)
 
 ## [2.1.1] - 2026-05-09
 

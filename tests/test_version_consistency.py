@@ -125,7 +125,7 @@ class TestWorkflowContracts:
         assert "uses: ./.github/workflows/reusable-version-consistency.yml" in workflow_text
         assert "uses: ./.github/workflows/reusable-next-version-request.yml" in workflow_text
         assert (
-            "uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe"
+            "uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda"
             in workflow_text
         )
         assert "source-repository: ${{ github.repository }}" in workflow_text
