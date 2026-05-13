@@ -5,6 +5,8 @@ All notable changes to the DQN Framework project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+<!-- markdownlint-disable MD022 MD024 MD032 -->
+
 ## [Unreleased]
 
 ### Added
@@ -12,7 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `.github/workflows/third-party-action-pinning.yml` and `.github/workflows/reusable-third-party-action-pinning.yml` — repo-local mirror of the monorepo SHA-pinning guard enforcing full 40-character SHA for third-party actions (stage 1)
 - `.github/actions-security/zizmor.yml` — repo-local mirror of the canonical zizmor policy for third-party action pinning
 
-### Changed
+### Changed (Workflow / Docs)
+
+- `.github/workflows/sonar.yml`, `sonar-project.properties`, `tests/test_version_consistency.py` — SonarCloud workflow now reads `version.py` and passes `sonar.projectVersion`, analysis explicitly declares supported Python versions, and CI coverage now includes `scripts/`
 
 - `.github/workflows/reusable-version-consistency.yml`, `reusable-next-version-request.yml`, `reusable-open-next-version-branch.yml` — synced to canonical mirror via centralized sync engine; removed cross-repo AI_Instruction checkout
 - `.github/workflows/reusable-third-party-action-pinning.yml` — synced to repo-local policy bundle; policy resolved from `.github/actions-security/zizmor.yml` instead of cross-repo checkout

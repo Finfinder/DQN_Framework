@@ -117,6 +117,24 @@ class TestWorkflowContracts:
         assert "Finfinder/AI_Instruction" not in workflow_text
         assert "scripts/validate_version_consistency.py" not in workflow_text
 
+    def test_sonar_workflow_passes_project_version_and_scripts_coverage(self):
+        repository_root = Path(__file__).resolve().parent.parent
+        workflow_text = (repository_root / ".github" / "workflows" / "sonar.yml").read_text(
+            encoding="utf-8"
+        )
+        sonar_properties_text = (repository_root / "sonar-project.properties").read_text(
+            encoding="utf-8"
+        )
+
+        assert "--cov=scripts" in workflow_text
+        assert "id: project-version" in workflow_text
+        assert "version.py" in workflow_text
+        assert "Invalid version.py format: expected X.Y.Z" in workflow_text
+        assert "echo \"version=$version\" >> \"$GITHUB_OUTPUT\"" in workflow_text
+        assert "match is None" in workflow_text
+        assert "-Dsonar.projectVersion=${{ steps.project-version.outputs.version }}" in workflow_text
+        assert "sonar.python.version=3.10,3.11" in sonar_properties_text
+
     def test_release_workflow_runs_version_validator(self):
         workflow_text = (
             Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release.yml"

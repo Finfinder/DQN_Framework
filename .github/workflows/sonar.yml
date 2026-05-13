@@ -43,10 +43,32 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov-report=xml:coverage.xml -q
+          pytest tests/ --cov=config --cov=agents --cov=memory --cov=utils --cov=models --cov=scripts --cov-report=xml:coverage.xml -q
+
+      - name: Read project version
+        id: project-version
+        shell: bash
+        run: |
+          version=$(python - <<'PY'
+          from pathlib import Path
+          import re
+
+          version_text = Path('version.py').read_text(encoding='utf-8')
+          match = re.search(r'__version__\s*=\s*["\'](?P<version>\d+\.\d+\.\d+)["\']', version_text)
+          if match is None:
+              raise SystemExit('Invalid version.py format: expected X.Y.Z')
+
+          print(match.group('version'))
+          PY
+          )
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@c7ee0f9df90b7aa20e8dcf9695dcfe2e7da5b4f2 # v7.2.1
+        with:
+          args: >-
+            -Dsonar.projectVersion=${{ steps.project-version.outputs.version }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
