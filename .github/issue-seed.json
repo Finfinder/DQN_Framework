@@ -1,0 +1,188 @@
+{
+  "issues": [
+    {
+      "title": "DQN-10 Complete community health files and repository cross-links",
+      "body": "Original backlog IDs: DQN-10\n\nAdd `CODE_OF_CONDUCT.md` and `SECURITY.md`, then cross-link the repository health files from README and CONTRIBUTING so contributors can find the canonical policy entry points quickly.",
+      "labels": [
+        "documentation",
+        "roadmap"
+      ],
+      "milestone": "3.0.x Repository Health & Release Automation",
+      "sourceIds": [
+        "DQN-10"
+      ]
+    },
+    {
+      "title": "DQN-11 Generate GitHub release notes from the matching CHANGELOG section",
+      "body": "Original backlog IDs: DQN-11\n\nAutomate release-note generation from the changelog section that matches the tag or version being released. Keep the output aligned with the repository's existing release cadence and changelog wording.",
+      "labels": [
+        "enhancement",
+        "documentation",
+        "roadmap"
+      ],
+      "milestone": "3.0.x Repository Health & Release Automation",
+      "sourceIds": [
+        "DQN-11"
+      ]
+    },
+    {
+      "title": "DQN-14 Unify policy for repo-local scripts across CI, Sonar, and ignore rules",
+      "body": "Original backlog IDs: DQN-14\n\nDefine one consistent policy for repo-local helper scripts across CI workflows, Sonar configuration, and ignore rules. Document which scripts are supported, which are intentionally local-only, and how they should be excluded or enforced.",
+      "labels": [
+        "technical-debt",
+        "roadmap"
+      ],
+      "milestone": "3.1.x Quality Gates & Workflow Hardening",
+      "sourceIds": [
+        "DQN-14"
+      ]
+    },
+    {
+      "title": "DQN-15 Align `tuning_test.py` with the chosen CI and coverage policy",
+      "body": "Original backlog IDs: DQN-15\n\nAlign `tuning_test.py` with the selected CI surface and coverage policy so its role is explicit. Either make it part of an enforced path with stable expectations or document why it remains outside the protected test slice.",
+      "labels": [
+        "technical-debt",
+        "training"
+      ],
+      "milestone": "3.1.x Quality Gates & Workflow Hardening",
+      "sourceIds": [
+        "DQN-15"
+      ]
+    },
+    {
+      "title": "DQN-18 Enforce a coverage threshold in CI and/or Sonar quality gates",
+      "body": "Original backlog IDs: DQN-18\n\nEnforce a repository coverage threshold in CI and/or Sonar using the existing `pytest-cov` reporting flow. The gate should fail predictably when coverage drops below the agreed baseline.",
+      "labels": [
+        "technical-debt",
+        "priority:high",
+        "training"
+      ],
+      "milestone": "3.1.x Quality Gates & Workflow Hardening",
+      "sourceIds": [
+        "DQN-18"
+      ]
+    },
+    {
+      "title": "DQN-22 Lint GitHub Actions workflows with actionlint",
+      "body": "Original backlog IDs: DQN-22\n\nAdd `actionlint` to the repository workflow validation path so malformed GitHub Actions changes are caught before merge. Keep the lint entry point easy to run locally and in CI.",
+      "labels": [
+        "technical-debt",
+        "priority:high"
+      ],
+      "milestone": "3.1.x Quality Gates & Workflow Hardening",
+      "sourceIds": [
+        "DQN-22"
+      ]
+    },
+    {
+      "title": "DQN-23 Review and refresh the SonarQube scan action pin beyond v7.2.1",
+      "body": "Original backlog IDs: DQN-23\n\nReview the pinned SonarQube scan action version and refresh it beyond `v7.2.1` if a supported update is available. Capture any compatibility or security implications in the change notes.",
+      "labels": [
+        "technical-debt",
+        "priority:high"
+      ],
+      "milestone": "3.1.x Quality Gates & Workflow Hardening",
+      "sourceIds": [
+        "DQN-23"
+      ]
+    },
+    {
+      "title": "DQN-16 Expand wrapper coverage for Atari and CNN preprocessing paths",
+      "body": "Original backlog IDs: DQN-16\n\nExtend the existing wrapper tests to cover Atari-specific preprocessing, frame stacking, and CNN-ready observation handling. Focus on deterministic edge cases that can silently break downstream training behavior.",
+      "labels": [
+        "technical-debt",
+        "environment"
+      ],
+      "milestone": "3.2.x Test Depth for CNN & Wrapper Paths",
+      "sourceIds": [
+        "DQN-16"
+      ]
+    },
+    {
+      "title": "DQN-17 Expand CNN model tests beyond forward-pass smoke coverage",
+      "body": "Original backlog IDs: DQN-17\n\nBuild on the current CNN smoke coverage with stronger assertions for tensor shapes, dueling head behavior, and supported configuration variants. The goal is to catch architectural regressions before training runs do.",
+      "labels": [
+        "technical-debt",
+        "training"
+      ],
+      "milestone": "3.2.x Test Depth for CNN & Wrapper Paths",
+      "sourceIds": [
+        "DQN-17"
+      ]
+    },
+    {
+      "title": "DQN-19 Add deterministic tests for orthogonal CNN weight initialization",
+      "body": "Original backlog IDs: DQN-19\n\nAdd deterministic tests around orthogonal CNN weight initialization so changes to setup code do not silently alter the expected parameter properties. Keep the assertions stable across supported runtime environments.",
+      "labels": [
+        "technical-debt",
+        "training"
+      ],
+      "milestone": "3.2.x Test Depth for CNN & Wrapper Paths",
+      "sourceIds": [
+        "DQN-19"
+      ]
+    },
+    {
+      "title": "DQN-20 Add gradient-flow and backward-pass tests for CNN networks",
+      "body": "Original backlog IDs: DQN-20\n\nAdd tests that exercise backward propagation and verify gradients flow through CNN networks under representative inputs. Cover the main training-critical branches instead of relying only on forward-pass validation.",
+      "labels": [
+        "technical-debt",
+        "training"
+      ],
+      "milestone": "3.2.x Test Depth for CNN & Wrapper Paths",
+      "sourceIds": [
+        "DQN-20"
+      ]
+    },
+    {
+      "title": "DQN-13 Implement SumTree-backed prioritized replay sampling",
+      "body": "Original backlog IDs: DQN-13\n\nReplace the current prioritized replay sampling internals with a SumTree-backed implementation while preserving the public buffer factory and training integration points. The new path should improve sampling efficiency without changing user-facing configuration semantics.",
+      "labels": [
+        "enhancement",
+        "training"
+      ],
+      "milestone": "3.3.x Benchmarking & Experiment Traceability",
+      "sourceIds": [
+        "DQN-13"
+      ]
+    },
+    {
+      "title": "DQN-21 Create reproducible CPU/GPU forward-pass benchmarks for CNN inference",
+      "body": "Original backlog IDs: DQN-21\n\nCreate reproducible CPU and GPU forward-pass benchmarks for CNN inference so architectural and environment changes can be compared on a stable baseline. Store outputs in a form that can be diffed across runs.",
+      "labels": [
+        "enhancement",
+        "training"
+      ],
+      "milestone": "3.3.x Benchmarking & Experiment Traceability",
+      "sourceIds": [
+        "DQN-21"
+      ]
+    },
+    {
+      "title": "FE-2 Persist experiment metadata manifests next to models and metrics",
+      "body": "Original backlog IDs: FE-2\n\nPersist machine-readable experiment manifests next to generated models and metrics so runs can be reproduced and compared without manual log inspection. Capture the minimum metadata needed to trace configuration, environment, and artifact lineage.",
+      "labels": [
+        "enhancement",
+        "training",
+        "roadmap"
+      ],
+      "milestone": "3.3.x Benchmarking & Experiment Traceability",
+      "sourceIds": [
+        "FE-2"
+      ]
+    },
+    {
+      "title": "FE-1 Add a Transformer-based Q-network backend as a new `network_type`",
+      "body": "Original backlog IDs: FE-1\n\nAdd a Transformer-based Q-network backend as a new `network_type` alongside the existing `mlp` and `cnn` options. Keep the implementation aligned with the current config and factory patterns so future backends remain composable.",
+      "labels": [
+        "enhancement",
+        "training",
+        "roadmap"
+      ],
+      "milestone": "4.0.x Network Architecture Extensions",
+      "sourceIds": [
+        "FE-1"
+      ]
+    }
+  ]
+}

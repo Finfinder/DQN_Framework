@@ -1,0 +1,99 @@
+{
+  "repo": {
+    "slug": "Finfinder/DQN_Framework"
+  },
+  "features": {
+    "issues": true,
+    "projects": true,
+    "wiki": false,
+    "discussions": false
+  },
+  "labels": [
+    {
+      "name": "bug",
+      "color": "d73a4a",
+      "description": "Bug to investigate and fix."
+    },
+    {
+      "name": "enhancement",
+      "color": "a2eeef",
+      "description": "Improvement or new capability."
+    },
+    {
+      "name": "documentation",
+      "color": "0075ca",
+      "description": "Documentation-only change."
+    },
+    {
+      "name": "priority:high",
+      "color": "b60205",
+      "description": "High-priority work."
+    },
+    {
+      "name": "ai",
+      "color": "1d76db",
+      "description": "AI-assisted workflow or automation topic."
+    },
+    {
+      "name": "technical-debt",
+      "color": "fbca04",
+      "description": "Refactoring, cleanup, or maintenance debt."
+    },
+    {
+      "name": "roadmap",
+      "color": "0e8a16",
+      "description": "Roadmap or larger planning topic."
+    },
+    {
+      "name": "agent",
+      "color": "5319e7",
+      "description": "Agent logic, policy updates, or action selection topic."
+    },
+    {
+      "name": "training",
+      "color": "0366d6",
+      "description": "Training loop, metrics, or optimization topic."
+    },
+    {
+      "name": "environment",
+      "color": "e99695",
+      "description": "Environment support, wrappers, or compatibility topic."
+    }
+  ],
+  "milestones": [
+    {
+      "title": "3.0.x Repository Health & Release Automation",
+      "description": "Complete repository health baselines and automate release-note publication from changelog entries.",
+      "state": "open"
+    },
+    {
+      "title": "3.1.x Quality Gates & Workflow Hardening",
+      "description": "Harden repo-local automation, coverage enforcement, and workflow dependency hygiene.",
+      "state": "open"
+    },
+    {
+      "title": "3.2.x Test Depth for CNN & Wrapper Paths",
+      "description": "Expand deterministic coverage for Atari wrappers, CNN preprocessing, and network behavior.",
+      "state": "open"
+    },
+    {
+      "title": "3.3.x Benchmarking & Experiment Traceability",
+      "description": "Benchmark replay and CNN execution paths while persisting reproducible experiment metadata.",
+      "state": "open"
+    },
+    {
+      "title": "4.0.x Network Architecture Extensions",
+      "description": "Extend the network stack with new backends, starting with a Transformer-based Q-network option.",
+      "state": "open"
+    }
+  ],
+  "roadmapIssue": {
+    "enabled": true,
+    "title": "Project Status / Roadmap",
+    "labels": [
+      "roadmap"
+    ],
+    "bodyPath": ".github/roadmap-issue.md",
+    "pin": true
+  }
+}

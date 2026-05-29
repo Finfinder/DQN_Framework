@@ -17,6 +17,12 @@ Currently supported configurations:
 - `Acrobot-v1`
 - `ALE/Pong-v5` (CNN DQN)
 
+## Feedback, Issues, and Contributing
+
+- Report bugs and feature ideas through GitHub Issues: https://github.com/Finfinder/DQN_Framework/issues
+- Larger goals are tracked with milestones and the pinned roadmap issue.
+- Collaboration notes live in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ---
 
 ## What's Included
